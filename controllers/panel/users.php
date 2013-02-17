@@ -42,8 +42,6 @@ Class Controller_users Extends Controller_Base {
            FROM MEMB_INFO O1
                 INNER JOIN mm_groups C1 ON O1.mm_group = C1.name
                 INNER JOIN MEMB_INFO O2 ON O1.memb_guid <= O2.memb_guid
-                INNER JOIN mm_groups C2 
-                  ON O2.mm_group = C2.name 
            GROUP BY O2.memb_guid 
            HAVING count(*) BETWEEN $start+1 AND $start + $on_page
         ) AS OO ON O.memb_guid = OO.memb_guid

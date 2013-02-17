@@ -188,35 +188,7 @@ Class Items extends CMS_System{
         return Array('Swords', 'Axes', 'Maces & Scepters', 'Spears', 'Bows & Crossbows', 'Staffs', 'Shields', 'Helms', 'Armors', 'Pants', 'Gloves', 'Boots', 'Accessories', 'Miscellaneous I', 'Miscellaneous II', 'Scrolls');
     }
 
-    
-      //Получение предметов из Web сундука
-    function get_web_items($id) {
 
-        static $items_arr;
-        if (isset($items_arr[$id])) {
-            return $items_arr[$id];
-        }
-
-        $res = $this->db->prepare("SELECT Item FROM mm_warehouse WHERE user_id=?;");
-        $res->execute(Array($id));
-        if (!$items_arr = $res->fetchAll()) {
-            return Array();
-        }
-        $itemKor = $this->itemKor();
-
-        $items = Array();
-        foreach ($items_arr AS $arr) {
-            $item_str = $arr['Item'];
-            if ($item = $this->hex2item($item_str) AND isset($itemKor[$item['type']][$item['id']])) {
-                $item['HEX'] = $item_str;
-                $item['KOR'] = $itemKor[$item['type']][$item['id']];
-                $item['type_name'] = $this->itemtype($item['type']);
-                $items[$item['serial']] = $item;
-            }
-        }
-        $items_arr[$id] = $items;
-        return $items;
-    }
 }
 
 ?>

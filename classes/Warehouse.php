@@ -200,79 +200,31 @@ Class Warehouse extends CMS_System{
         $res->execute(Array($bin, $id));
     }
     
-      //Перемещение предмета из сундука на web склад
-    function warehouse2web($id, $item_id) {
-        $items = $this->get_items($id);
-        if (!isset($items[$item_id])) {
-            throw new Exception('Этого предмета нет в сундуке');
-        }
-
-        //Проверяем нет ли на складе предмета с тем же serial
-        $web_items = Items::me()->get_web_items($id);
-        if (isset($web_items[$item_id])) {
-            //Меняем serial перемещаемого предмета
-            $serial = $item_id;
-            while (isset($web_items[$serial])) {
-                $serial = Func::rand_string(8, '0123456789ABCDEF');
-            }
-            //Формируем новый HEX предмета с учётом нового serial
-            $items[$item_id]['serial'] = $serial;
-            $items[$item_id]['HEX'] = Items::me()->item2hex($items[$item_id]);
+    //Удаление предмета из сундука
+    function del_item($user_id,$serial){
+        //Получаем предметы юзера
+        $items = $this->get_items($user_id);
+        if(!isset($items[$serial])){
+            throw new Exception('Нет предмета в сундуке');
         }
         
-        
-        //Координаты предметов
-        $items_kor = Array();
-        foreach ($items AS $key=>$item) {
-            if($key==$item_id){
-                continue;
-            }
-            $x = $item['x'];
-            $y = $item['y'];
-            $w = $item['KOR']['x'];
-            $h = $item['KOR']['y'];
-            $items_kor[$x][$y]=$item['HEX'];
-        }
-
-
         //Формируем новый HEX
         $HEX = '';
-        for ($j = 0; $j < 15; $j++) {
-            for ($i = 0; $i < 8; $i++) {
-                if(!empty($items_kor[$i][$j])){
-                 $HEX.=$items_kor[$i][$j];
-                }else{
-                    $HEX.='FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
-                }
+        foreach($items AS $key => $item){
+            if($key==$serial){
+                $HEX.='FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
+            }
+            else{
+                $HEX.=$item['HEX'];
             }
         }
-
+        
         //Сохраняем новый HEX
         $bin = Items::me()->hextobin($HEX);
         $res = $this->db->prepare("UPDATE warehouse SET [Items]=? WHERE [AccountID]=?;");
-        $res->execute(Array($bin, $id));
-
-        //Добавляем предмет на веб склад
-        $bin = Items::me()->hextobin($items[$item_id]['HEX']);
-        $res = $this->db->prepare("INSERT INTO mm_warehouse (user_id,Item,serial) VALUES (?,?,?);");
-        $res->execute(Array($id, $bin, $items[$item_id]['serial']));
+        $res->execute(Array($bin, $user_id));
     }
-
-    //Перемещение предмета из web склада в сундук
-    function web2warehouse($id, $item_id) {
-        $web_items = Items::me()->get_web_items($id);
-        if (!isset($web_items[$item_id])) {
-            throw new Exception('Этого предмета нет на складе');
-        }
-
-
-        $this->add_item($id, $web_items[$item_id]['HEX']);
-        
-        //Удаляем предмет из веб склада
-        $res = $this->db->prepare("DELETE FROM mm_warehouse WHERE user_id=? AND serial=?;");
-        $res->execute(Array($id, $item_id));
-    }
-
+    
     //Перемещение предметов в сундуке по карте
     function replace_items($id, $item_id,$newX,$newY) {
         $items_pos = Array();
