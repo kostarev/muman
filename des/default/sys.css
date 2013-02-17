@@ -1,0 +1,31 @@
+/*Системные*/
+.red{color:#ff3333;}
+.green{color:#009900;}
+.siren{color:#cc33ff;}
+table.sys th{background-color: #9999ff; padding:7px; text-align: center;}
+table.sys td{background-color: #ccccff; padding:7px; text-align: center;}
+tr.back_green td{background-color:#99ff99;}
+tr.back_green td a{color:#ff3333;}
+input:required,textarea:required{background:url(redstar.gif) no-repeat right;}
+
+/*Листинг страниц*/
+.pages{margin-top:15px; margin-bottom:15px;}
+.pages span{padding:7px; border:solid 1px #B7D6F0;margin:3px;}
+.pages span.current{border:solid 1px #7C71D3;}
+.pages a{text-decoration:none;}
+.pages a:hover span{background-color:#B7FCDE;border:solid 1px #7C71D3;}
+
+/*javascript сообщения*/
+div.js_message{display:none;border:solid 1px #9999ff;max-width:300px;position: fixed;left:200px;top:200px;background-color: #ffff99;padding:20px;border-radius: 8px;}
+div.js_message a.close{color:#cc33ff;float:right;position: relative; top:-10px;right:-10px;}
+
+/*Закрываемые блоки*/
+.open{border:solid 1px #cccccc;padding:5px;margin-top:20px;border-radius: 6px; cursor: pointer;}
+.open:hover{background-color: #B7D6F0;}
+.close{display: none;border:solid 1px #cccccc;padding:5px;margin:20px;border-radius: 6px;}
+
+/*Смайлы, бб коды*/
+.smiles img{cursor: pointer;}
+.bb span{cursor:pointer;}
+/*Цитата*/
+.quote{border: dotted 1px #5090F7; display:block; background-color:#FFFFFF;padding:5px;}
