@@ -15,7 +15,7 @@
     <title><?=$title;?></title>
 	</head>
     <body>
-
+Какое то изменение
 <div id="all">
 
 	<div id="navigation">
