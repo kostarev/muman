@@ -23,7 +23,7 @@ Class Warehouse extends CMS_System{
         $res = $this->db->prepare("SELECT * FROM warehouse WHERE AccountID=?;");
         $res->execute(Array($id));
         if (!$row = $res->fetch()) {
-            $this->make($user_id);
+            $this->make($id);
             return $arr;
         }
         $arr = $row;
@@ -36,7 +36,7 @@ Class Warehouse extends CMS_System{
         $res = $this->db->prepare("SELECT Money FROM warehouse WHERE AccountID=?;");
         $res->execute(Array($id));
         if (!$row = $res->fetch()) {
-            $this->make($user_id);
+            $this->make($id);
             return 0;
         }
 
@@ -52,7 +52,7 @@ Class Warehouse extends CMS_System{
         $res = $this->db->prepare("SELECT Items FROM warehouse WHERE AccountID=?;");
         $res->execute(Array($id));
         if (!$row = $res->fetch()) {
-            $this->make($user_id);
+            $this->make($id);
             return Array();
         }
 
