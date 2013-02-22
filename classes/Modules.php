@@ -1,21 +1,21 @@
 <?php
 
-Class Modules extends CMS_System{
+Class Modules extends CMS_System {
 
     public $modules_dir, $back_modules_dir, $all_files;
-   
-  //Одиночка паттерн------
+    //Одиночка паттерн------
     static protected $instance = null;
+
     //Метод предоставляет доступ к объекту
-    static public function me(){
+    static public function me() {
         if (is_null(self::$instance))
             self::$instance = new Modules();
         return self::$instance;
     }
-    
+
     protected function __construct() {
         parent::__construct();
-         $this->modules_dir = D . '/sys/modules';
+        $this->modules_dir = D . '/sys/modules';
         if (!is_dir($this->modules_dir)) {
             mkdir($this->modules_dir);
         }
@@ -25,17 +25,16 @@ Class Modules extends CMS_System{
             mkdir($this->back_modules_dir);
         }
     }
+
     //------------------------
-    
-    
     //Список модулей
-    function get_modules(){
-        
+    function get_modules() {
+
         $res = $this->db->prepare("SELECT id FROM mm_modules WHERE fname=?;");
         $modules = Array();
         $zip = new ZipArchive();
         $modules_arr = scandir($this->modules_dir);
-        
+
         foreach ($modules_arr AS $key => $mod_file) {
             if ($mod_file == '.' OR $mod_file == '..') {
                 continue;
@@ -51,6 +50,7 @@ Class Modules extends CMS_System{
 
                 $res->execute(Array($mod_file));
                 if ($row = $res->fetch()) {
+                    $info_arr['id'] = $row['id'];
                     $info_arr['installed'] = true;
                 } else {
                     $info_arr['installed'] = false;
@@ -61,22 +61,35 @@ Class Modules extends CMS_System{
         }
         return $modules;
     }
-    
+
     //Проверка существования файла модуля
-    function is_mod($fname){
+    function is_mod($fname) {
         return is_file($this->modules_dir . '/' . $fname);
     }
-    
+
     //Проверка установленности модуля
-    function is_installed($fname){
+    function is_installed($fname) {
         $res = $this->db->prepare("SELECT id FROM mm_modules WHERE fname =?;");
         $res->execute(Array($fname));
         return $res->fetch();
     }
-    
+
+    //Список файлов модуля
+    function mod_files($id) {
+        $arr = Array();
+        $id = (int) $id;
+        $res = $this->db->prepare("SELECT fname FROM mm_modules_files WHERE module=?;");
+        $res->execute(Array($id));
+        while ($row = $res->fetch()) {
+            $arr[] = $row['fname'];
+        }
+
+        return $arr;
+    }
+
     //Установка модуля
-    function install($fname){
-         if (!$this->is_mod($fname)) {
+    function install($fname) {
+        if (!$this->is_mod($fname)) {
             throw new Exception('Файл модуля не найден');
         }
 
@@ -88,7 +101,7 @@ Class Modules extends CMS_System{
         if ($this->is_installed($fname)) {
             throw new Exception('Модуль ' . $fname . ' уже установлен.');
         }
-        
+
         $conflict = false;
         $numFiles = $zip->numFiles;
         $all_files = Array();
@@ -119,7 +132,7 @@ Class Modules extends CMS_System{
         if (!$conflict) {
             $res = $this->db->prepare("INSERT INTO mm_modules (fname) VALUES (?);");
             $res->execute(Array($fname));
-            
+
             $arr = $this->db->query("SELECT IDENT_CURRENT('[mm_modules]') AS id;")->fetch();
             $module_id = $arr['id'];
             //$module_id = $this->db->lastInsertId();
@@ -142,17 +155,28 @@ Class Modules extends CMS_System{
 
             $zip->extractTo(D);
 
+            //Запускаем инсталятор если есть
             if (is_file(D . '/install.php')) {
                 ob_start();
                 include D . '/install.php';
                 $install_str = ob_get_contents();
                 ob_end_clean();
+                unlink(D . '/install.php');
+            }
+            //--------------------
+            //Удаляем лишние извлечённые файлы---
+            if (is_file(D . '/info.ini')) {
+                unlink(D . '/info.ini');
+            }
+            if (is_file(D . '/uninstall.php')) {
+                unlink(D . '/uninstall.php');
             }
 
+            if (is_file(D . '/_icon.png')) {
+                unlink(D . '/_icon.png');
+            }
+            //-----------------------------------
 
-            unlink(D . '/info.ini');
-            unlink(D . '/uninstall.php');
-            unlink(D . '/install.php');
 
             /*
               $this->des->set('ok', true);
@@ -161,17 +185,16 @@ Class Modules extends CMS_System{
             $zip->close();
             $this->cache->flush();
             return true;
-        }else{
+        } else {
             $this->all_files = $all_files;
             return false;
         }
     }
-    
-    
+
     //Uninstall модуля
-    function uninstall($fname){
-         if (!$this->is_mod($fname)) {
-             throw new Exception('Файл модуля не найден');
+    function uninstall($fname) {
+        if (!$this->is_mod($fname)) {
+            throw new Exception('Файл модуля не найден');
         }
 
         $zip = new ZipArchive();
@@ -197,39 +220,36 @@ Class Modules extends CMS_System{
             //$this->des->set('uninstall_str', $uninstall_str);
         }
         //----------------------------------
-        
         //Удаляем файлы модуля-----
         $res = $this->db->prepare("SELECT fname FROM mm_modules_files WHERE module=?;");
         $res->execute(Array($module_id));
         $rows = $res->fetchAll();
-        foreach($rows AS $row){
-            unlink(D . '/'.$row['fname']);
+        foreach ($rows AS $row) {
+            unlink(D . '/' . $row['fname']);
         }
         //-------------------------
-        
-        
         //Удаляем информацию о модуле из базы---
         $res = $this->db->prepare("DELETE FROM mm_modules_files WHERE module=?;");
         $res->execute(Array($module_id));
         $res = $this->db->prepare("DELETE FROM mm_modules WHERE id=?;");
         $res->execute(Array($module_id));
         //------------------------------------
-       
+
         $zip->close();
-        
+
         //Возвращаем забэкапленные файлы если есть
         if ($zip->open($this->back_modules_dir . '/' . $fname . '.zip') === true) {
-         $zip->extractTo(D);
-         $zip->close();
+            $zip->extractTo(D);
+            $zip->close();
         }
-        
+
         unlink($this->back_modules_dir . '/' . $fname . '.zip');
 
         $this->cache->flush();
     }
-    
+
     //Удаление файла модуля
-    function del($fname){
+    function del($fname) {
         if (!$this->is_mod($fname)) {
             throw new Exception('Файл модуля не найден');
         }
@@ -241,6 +261,144 @@ Class Modules extends CMS_System{
         }
 
         unlink($this->modules_dir . '/' . $fname);
+    }
+
+    //Получение информации об установленном модуле
+    function get($fname) {
+        if (!$this->is_mod($fname)) {
+            throw new Exception('Модуль не существует');
+        }
+
+        $res = $this->db->prepare("SELECT * FROM mm_modules WHERE fname=?;");
+        $res->execute(Array($fname));
+        if (!$row = $res->fetch()) {
+            throw new Exception('Модуль не установлен');
+        }
+
+        $res = $this->db->prepare("SELECT * FROM mm_modules_files WHERE [module]=?;");
+        $res->execute(Array($row['id']));
+        while ($files = $res->fetch()) {
+            $row['files'][$files['fname']] = $files;
+        }
+        return $row;
+    }
+
+    //Добавление файла в список файлов модуля
+    function add_file($mod, $fname) {
+        if (!is_file(D . '/' . $fname)) {
+            throw new Exception('Файл не найден');
+        }
+
+        $module = $this->get($mod);
+        if (isset($module['files'][$fname])) {
+            throw new Exception('Файл уже есть в модуле');
+        }
+        //Добавление записи в базу
+        $res = $this->db->prepare("INSERT INTO mm_modules_files (module, fname) VALUES (?,?);");
+        $res->execute(Array($module['id'], $fname));
+
+        //Добавление файла в архив
+        $zip = new ZipArchive();
+        if ($zip->open($this->modules_dir . '/' . $mod) !== true) {
+            throw new Exception('Ошибка открытия файла модуля');
+        }
+        $res = $zip->addFile($fname);
+        $zip->close();
+        return $res;
+    }
+
+    //Удаление файла из файлов модуля
+    function del_file($mod, $fname) {
+        $module = $this->get($mod);
+        if (!isset($module['files'][$fname])) {
+            throw new Exception('Файла нет в модуле');
+        }
+
+        //Удаляем запись из базы
+        $res = $this->db->prepare("DELETE FROM mm_modules_files WHERE module=? AND  fname=?;");
+        $res->execute(Array($module['id'], $fname));
+
+        //Удаляем файл из архива
+        $zip = new ZipArchive();
+        if ($zip->open($this->modules_dir . '/' . $mod) !== true) {
+            throw new Exception('Ошибка открытия файла модуля');
+        }
+        $res = $zip->deleteName($fname);
+        $zip->close();
+        return $res;
+    }
+
+    //Редактор ini файла
+    function set_info($fname, $info_arr) {
+        if (!$this->is_mod($fname)) {
+            throw new Exception('Модуль не найден');
+        }
+
+        $zip = new ZipArchive();
+        if ($zip->open($this->modules_dir . '/' . $fname) !== true) {
+            throw new Exception('Ошибка открытия файла модуля');
+        }
+
+        $ini_string = '[info]
+title = {title}
+autor = {autor}
+version = {version}
+cms_version = {cms_version}
+description = {description}';
+        
+        foreach($info_arr AS $key => $val){
+
+            if($val){
+            $ini_string = str_replace('{'.$key.'}',$val,$ini_string);
+            }
+        }
+        
+        //Если строка валидная, записываем info.ini
+        if(parse_ini_string($ini_string)){
+        $zip->addFromString('info.ini', $ini_string);
+        }
+        $zip->close();
+    }
+    
+    //Создание заготовки модуля
+    function make($arr){
+        if(!isset($arr['fname'])){
+            throw new Exception('Указите название файла для нового модуля');
+        }
+        
+        $fname = preg_replace('|(^[a-zA-Z0-9\-])|','!',$arr['fname']);
+        if(!$fname){
+            throw new Exception('Не верное название для файла модуля');
+        }
+        $fname.='.smod';
+        //Создаём архив модуля
+        $zip = new ZipArchive();
+        $zip->open($this->modules_dir . '/' . $fname, ZIPARCHIVE::CREATE);
+        
+        $ini_string = '[info]
+title = {title}
+autor = {autor}
+version = {version}
+cms_version = {cms_version}
+description = {description}';
+        $ini_string1 = $ini_string;
+        
+        foreach($arr AS $key => $val){
+            if($val){
+            $ini_string = str_replace('{'.$key.'}',$val,$ini_string);
+            }
+        }
+        
+        //Если строка валидная, записываем info.ini
+        if(!parse_ini_string($ini_string)){
+        $ini_string = $ini_string1;
+        }
+        $zip->addFromString('info.ini', $ini_string);
+        
+        $zip->addFromString('install.php', "<?php\n//Скрипт выполняется при подключении модуля\n\n\n\n\n?>");
+        $zip->addFromString('uninstall.php', '<?php\n//Скрипт выполняется при отключении модуля\n\n\n\n\n?>');
+        
+        $zip->close();
     }
 
 }

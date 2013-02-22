@@ -1,4 +1,5 @@
 <?php
+
 class Func {
 
     //Валидация логина
@@ -9,10 +10,10 @@ class Func {
         }
         return true;
     }
-    
-      //Валидация имени
+
+    //Валидация имени
     static function valid_name($str) {
-       // $str = Func::translit($str);
+        // $str = Func::translit($str);
         if (preg_match("([^a-zA-Z0-9])", $str)) {
             return false;
         }
@@ -142,7 +143,7 @@ class Func {
 //shablon - http://site.ru/big_text.php?p={page}
 //size - Количество отображаемых элементов в  строке страниц
 //----------------------------------------------
-   static  function pages($page, $max, $shablon, $size = 5) {
+    static function pages($page, $max, $shablon, $size = 5) {
         $page_str = '';
         $page = (int) $page;
         $max = (int) $max;
@@ -169,7 +170,7 @@ class Func {
         if ($page < $max) {
             $page_str.='<a href="' . str_replace('{page}', $page + 1, $shablon) . '"><span>&gt;</span></a><a href="' . str_replace('{page}', $max, $shablon) . '"><span>&gt;&gt;</span></a>';
         }
-        return '<div class="pages">'.$page_str.'</div>';
+        return '<div class="pages">' . $page_str . '</div>';
     }
 
 //----------------------------------------
@@ -241,13 +242,87 @@ class Func {
 
     //Замена ссылок на html код
     static function links($text) {
-        $text = preg_replace("?((f|ht){1}t(p|ps)://)[^\s,@,*,^,\,\{,\},\[,\],\(,\),\",\',!]+?i", '<a href="$0">$0</a>',$text);
+        $text = preg_replace("?((f|ht){1}t(p|ps)://)[^\s,@,*,^,\,\{,\},\[,\],\(,\),\",\',!]+?i", '<a href="$0">$0</a>', $text);
         return $text;
     }
-    
+
     //Фильтр html
-    static function filtr($text){
+    static function filtr($text) {
         return htmlspecialchars(trim($text));
+    }
+
+    //Скачивание файла
+    function download($filename, $name = '', $mimetype = '') {
+        if (!file_exists($filename)) {
+            throw new Exception('Файл не найден');
+        }
+        @ob_end_clean();
+        $from = 0;
+        $size = filesize($filename);
+        $to = $size;
+
+        if (!$mimetype) {
+
+            $type = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+
+            $mimes = Array(
+                '3gp' => 'video/3gpp', '7z' => 'application/x-7z-compressed', 'avi' => 'video/x-msvideo',
+                'bmp' => 'image/x-ms-bmp', 'css' => 'text/css', 'djv' => 'image/vnd.djvu', 'doc' => 'application/msword',
+                'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'exe' => 'application/x-msdos-program', 'flac' => 'audio/flac', 'flv' => 'video/x-flv',
+                'gif' => 'image/gif', 'htm' => 'text/plain', 'html' => 'text/plain',
+                'ico' => 'image/x-icon', 'info' => 'application/x-info',
+                'iso' => 'application/x-iso9660-image', 'jad' => 'text/vnd.sun.j2me.app-descriptor',
+                'jar' => 'application/java-archive', 'java' => 'text/x-java', 'jpeg' => 'image/jpeg',
+                'jpg' => 'image/jpeg', 'm3u' => 'audio/x-mpegurl', 'mid' => 'audio/midi',
+                'midi' => 'audio/midi', 'mkv' => 'video/x-matroska', 'mp2' => 'audio/mpeg',
+                'mp3' => 'audio/mpeg', 'mp4' => 'video/mp4', 'mpeg' => 'video/mpeg',
+                'oga' => 'audio/ogg', 'ogg' => 'audio/ogg', 'ogv' => 'audio/ogg', 'ogx' => 'audio/ogg',
+                'php' => 'application/x-httpd-php', 'php3' => 'application/x-httpd-php3',
+                'php4' => 'application/x-httpd-php4', 'phps' => 'application/x-httpd-php-source',
+                'png' => 'image/png', 'rar' => 'application/rar', 'shtml' => 'text/plain',
+                'sis' => 'application/vnd.symbian.install', 'sisx' => 'x-epoc/x-sisx-app',
+                'swf' => 'application/x-shockwave-flash', 'tar' => 'application/x-tar',
+                'taz' => 'application/x-gtar', 'text' => 'text/plain', 'torrent' => 'application/x-bittorrent',
+                'txt' => 'text/plain', 'wav' => 'audio/x-wav', 'xhtml' => 'application/xhtml+xml',
+                'xls' => 'application/vnd.ms-excel', 'xml' => 'application/xml',
+                'zip' => 'application/zip');
+
+            $mimetype = isset($mimes[$type]) ? $mimes[$type] : 'application/octet-stream';
+        }
+
+        header('HTTP/1.1 200 Ok');
+        $etag = md5($filename);
+        header('ETag: "' . $etag . '"');
+        header('Accept-Ranges: bytes');
+        header('Content-Length: ' . ($to - $from));
+        header('Connection: close');
+        header('Content-Type: ' . $mimetype);
+        header('Last-Modified: ' . gmdate('r', filemtime($filename)));
+        header("Last-Modified: " . gmdate("D, d M Y H:i:s", filemtime($filename)) . " GMT");
+        header("Expires: " . gmdate("D, d M Y H:i:s", time() + 3600) . " GMT");
+
+        if (preg_match('#^image/#i', $mimetype)){
+            header('Content-Disposition: filename="' . $name . '";');
+        }
+        else{
+            header('Content-Disposition: attachment; filename="' . $name . '";');
+        }
+
+
+        $f = fopen($filename, 'rb');
+
+        fseek($f, $from, SEEK_SET);
+        $size = $to;
+        $downloaded = 0;
+        while (!feof($f) and !connection_status() and ($downloaded < $size)) {
+            $block = min(1024 * 8, $size - $downloaded);
+            echo fread($f, $block);
+            $downloaded += $block;
+            flush();
+        }
+        fclose($f);
+        exit;
     }
 
 }

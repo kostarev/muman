@@ -37,7 +37,7 @@ jQuery(function() {
             }
             parId = this.id; 
         });
-        $("#"+parId+" .close").toggle("fast");
+        $("#"+parId+">.close").toggle("fast");
     });
 });
 

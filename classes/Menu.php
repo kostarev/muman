@@ -74,7 +74,7 @@ Class Menu extends CMS_System {
     }
 
     //html код дерева менюшки, по шаблону
-    function get_tree_html($mother, $li_class) {
+    function get_tree_html($mother, $li_class='') {
         if (!$arr = $this->get($mother)) {
             return '';
         }
@@ -83,7 +83,6 @@ Class Menu extends CMS_System {
         foreach ($arr AS $val) {
             $span_class = '';
             $a_class = ($li_class == 'class="top"') ? ' class="top_link"' : '';
-            $i++;
             if ($child_html = $this->get_tree_html($val['name'])) {
                 $child_html = '<ul' . $child_class . '>' . $child_html . '</ul>';
                 $span_class = ($li_class == 'class="top"') ? ' class="down"' : ' class="right"';

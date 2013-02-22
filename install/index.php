@@ -138,10 +138,10 @@ if ($step == 1) {
             $res->execute(Array('panel', 'users', 'Пользователи', 3, 'panel', '/panel/users'));
             $res->execute(Array('panel', 'menu_editor', 'Редактор меню', 2, 'menu-editor', '/panel/menu'));
             $res->execute(Array('settings', 'set-dev', 'Разработчику', 0, 'root', '/panel/settings/developer'));
-            $res->execute(Array('modules', 'mod-new', 'Добавить', 1, '', '/panel/modules/install'));
+            $res->execute(Array('modules', 'mod-new', 'Добавить', 1, 'change-modules', '/panel/modules/install'));
             $res->execute(Array('settings', 'set-reg', 'Настройки', 1, 'panel-settings', '/panel/settings/reg'));
             $res->execute(Array('kabinet', 'kabinet-pers', 'Персонажи', 1, 'user', '/kabinet/pers'));
-            $res->execute(Array('modules', 'mod-installed', 'Загруженные', 0, '', '/panel/modules/installed'));
+            $res->execute(Array('modules', 'mod-installed', 'Загруженные', 0, 'change-modules', '/panel/modules/installed'));
         }
 
         $res = $db->query("SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'mm_modules';");

@@ -62,7 +62,6 @@
         <?=$uninstall_str;?>
     </div>
     <?else:?>
-    <p><a href="<?=H;?>/panel/modules/installed">Загруженные</a></p>
-    <p><a href="<?=H;?>/panel/modules/install">Загрузить новый модуль</a></p>
+      <?=$menu->get_html('modules','<p><a href="{url}">{title}</a></p>');?>
     <?endif?>
 </div>
