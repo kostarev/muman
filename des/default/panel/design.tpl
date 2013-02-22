@@ -6,6 +6,7 @@
                 <td>
                     <b><?=$des['title'];?></b><br />
                     Папка: <?=$des['dir'];?><br />
+                    Автор: <?=$des['autor'];?><br />
                     Описание: <?=$des['description'];?><br />
                     <?if($theme == $des['dir']):?>
                     <span class="green">Выбрана</span>

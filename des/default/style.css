@@ -8,13 +8,19 @@ hr {
 	border-bottom: 1px solid #f8f5ef;
 }
 a {
-	color: #735726;
+	color: #1d3f4d;
+	text-decoration: none;
+	border-bottom: 0px dotted #735726;
+}
+a.head_a {
+	color: #ffffff;
 	text-decoration: none;
 	border-bottom: 0px dotted #735726;
 }
 a:hover {
-	color: #b09360;
+	
 	border-bottom: 0px dotted #735726;
+        text-decoration:underline;
 }
 body {
 	margin: 0px;
