@@ -90,6 +90,7 @@ if ($step == 1) {
             $res = $db->prepare("INSERT INTO mm_config (mother, [name], title, [type], [value], [group]) VALUES (?, ?, ?, ?, ?, ?);");
             $res->execute(Array('0','developer','Разработчику','text', 'directory','root'));
             $res->execute(Array('0', 'reg', 'Регистрация', 'text', 'directory', ''));
+            $res->execute(Array('0', 'des', 'design', 'text', 'default', ''));
             $res->execute(Array('developer', 'memcache_table', 'Memcache таблица', 'checkbox', '0', ''));
             $res->execute(Array('developer', 'params_table','Данные php роутера', 'checkbox', '0', ''));
             $res->execute(Array('developer', 'sql_table', 'Таблица SQL запросов', 'checkbox', '0', ''));
@@ -139,7 +140,8 @@ if ($step == 1) {
             $res->execute(Array('panel', 'menu_editor', 'Редактор меню', 2, 'menu-editor', '/panel/menu'));
             $res->execute(Array('settings', 'set-dev', 'Разработчику', 0, 'root', '/panel/settings/developer'));
             $res->execute(Array('modules', 'mod-new', 'Добавить', 1, 'change-modules', '/panel/modules/install'));
-            $res->execute(Array('settings', 'set-reg', 'Настройки', 1, 'panel-settings', '/panel/settings/reg'));
+            $res->execute(Array('settings', 'settings', 'Темы оформления', 1, 'panel-settings', '/panel/design'));
+            $res->execute(Array('design', 'set-reg', 'Настройки', 1, 'panel-settings', '/panel/settings/reg'));
             $res->execute(Array('kabinet', 'kabinet-pers', 'Персонажи', 1, 'user', '/kabinet/pers'));
             $res->execute(Array('modules', 'mod-installed', 'Загруженные', 0, 'change-modules', '/panel/modules/installed'));
         }

@@ -12,7 +12,7 @@ Class Template extends CMS_System {
 
     public function __construct() {
         parent::__construct();
-        $this->set_theme('default');
+        $this->set_theme($this->conf['des']);
         $this->menu = new Menu();
         if(isset($_GET['ajax'])){
             $this->auto_head = false;
