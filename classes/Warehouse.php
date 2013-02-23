@@ -64,9 +64,7 @@ Class Warehouse extends CMS_System{
             $str = substr($str, 2);
         }
 
-        
-        $itemKor = Items::me()->itemKor();
-
+    
         $items = Array();
         $pos = 0;
         $i = 0;
@@ -81,12 +79,9 @@ Class Warehouse extends CMS_System{
                 $item_str = str_replace("\0", '', $item_str) . '0';
             }
 
-            if ($item = Items::me()->hex2item($item_str) AND isset($itemKor[$item['type']][$item['id']])) {
+            if ($item = Items::me()->hex2item($item_str)) {
                 $item['x'] = $x;
                 $item['y'] = $y;
-                $item['HEX'] = $item_str;
-                $item['KOR'] = $itemKor[$item['type']][$item['id']];
-                $item['type_name'] = Items::me()->itemtype($item['type']);
                 $items[$item['serial']] = $item;
             }
             $x++;

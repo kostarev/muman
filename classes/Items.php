@@ -87,6 +87,10 @@ Class Items extends CMS_System{
         $arr['harmony']['value'] = hexdec(substr($str, 21, 1));
         $arr['sockets'] = substr($str, -10);
 
+        $itemKor = $this->itemKor();
+        $arr['KOR'] = $itemKor[$arr['type']][$arr['id']];
+        $arr['type_name'] = $this->itemtype($arr['type']);
+        $arr['HEX'] = $str;
         return $arr;
     }
 
