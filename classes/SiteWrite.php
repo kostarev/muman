@@ -1,21 +1,22 @@
 <?php
+
 Class SiteWrite extends CMS_System {
-    
-        
+
     //Одиночка паттерн
-     static protected $instance = null;
+    static protected $instance = null;
+
     //Метод предоставляет доступ к объекту
-    static public function me(){
+    static public function me() {
         if (is_null(self::$instance))
             self::$instance = new SiteWrite();
         return self::$instance;
     }
-    
+
     protected function __construct() {
         parent::__construct();
     }
-    //-----------------
 
+    //-----------------
     //Сохранение настроек----
     function save_conf($mother, $name, $value) {
         $res = $this->db->prepare("UPDATE mm_config SET value=? WHERE mother=? AND name=?;");
@@ -78,22 +79,22 @@ Class SiteWrite extends CMS_System {
             throw new Exception('Не верный адре электронной почты.');
         }
 
-        if (mb_strlen($login,'UTF-8') < 3 OR strlen($login) > 10) {
+        if (mb_strlen($login, 'UTF-8') < 3 OR strlen($login) > 10) {
             throw new Exception('Длина логина должна быть от 3х до 10и символов');
         }
-        
-        if (mb_strlen($memb_name,'UTF-8') < 3 OR mb_strlen($memb_name,'UTF-8') > 10) {
+
+        if (mb_strlen($memb_name, 'UTF-8') < 3 OR mb_strlen($memb_name, 'UTF-8') > 10) {
             throw new Exception('Длина имени должна быть от 3х до 10и символов');
         }
 
-        if (mb_strlen($pas,'UTF-8') < 5 OR mb_strlen($pas,'UTF-8') > 10) {
+        if (mb_strlen($pas, 'UTF-8') < 5 OR mb_strlen($pas, 'UTF-8') > 10) {
             throw new Exception('Длина пароля должна быть 5и до 10и символов.');
         }
 
         if (!Func::valid_login($login)) {
             throw new Exception('Запрещённые символы в поле Login! Разрешены только буквы латинского алфавита и цифры.');
         }
-        
+
         if (!Func::valid_name($memb_name)) {
             throw new Exception('Запрещённые символы в поле Имя! Разрешены только буквы латинского алфавита и цифры.');
         }
@@ -104,7 +105,7 @@ Class SiteWrite extends CMS_System {
         if ($row = $res->fetch()) {
             throw new Exception("Пользователь с логином $login уже зарегистрирован. Выберите другой логин.");
         }
-        
+
         $res = $this->db->prepare("SELECT memb_guid FROM MEMB_INFO WHERE memb_name=?;");
         $res->execute(Array($memb_name));
         if ($row = $res->fetch()) {
@@ -120,7 +121,7 @@ Class SiteWrite extends CMS_System {
         }
 
         //Удаляем не подтверждённые аккаунты, старше суток
-        $this->db->query("DELETE FROM mm_tmp_users WHERE time<".TIME."-3600*24;");
+        $this->db->query("DELETE FROM mm_tmp_users WHERE time<" . TIME . "-3600*24;");
 
         $res = $this->db->prepare("SELECT login FROM mm_tmp_users WHERE login=?;");
         $res->execute(Array($login));
@@ -138,13 +139,13 @@ Class SiteWrite extends CMS_System {
 
 
         //Шифруем пароль
-       if(MD5){
-        $res =$this->db->prepare("SELECT [dbo].[fn_md5](?,?) AS pas;");
-        $res->execute(Array($pas,$login));
-        $arr = $res->fetch();
-        $md5pas = $arr['pas'];
-        }else{
-        $md5pas = $pas;
+        if (MD5) {
+            $res = $this->db->prepare("SELECT [dbo].[fn_md5](?,?) AS pas;");
+            $res->execute(Array($pas, $login));
+            $arr = $res->fetch();
+            $md5pas = $arr['pas'];
+        } else {
+            $md5pas = $pas;
         }
 
         //Если требуется подтверждение $email--
@@ -155,9 +156,9 @@ Class SiteWrite extends CMS_System {
                 $code = Func::rand_string(10);
                 $res = $this->db->prepare("INSERT INTO mm_tmp_users (login,memb_name,pas,email,code,time) VALUES (?,?,?,?,?,?);");
                 if (!$res->execute(Array($login, $memb_name, $md5pas, $email, $code, TIME))) {
-                    throw new Exception(''.$this->db->errorInfo());
+                    throw new Exception('' . $this->db->errorInfo());
                 }
-                
+
                 //Высылаем код для подтверждения email
                 $from_name = 'Администрация ' . $_SERVER['HTTP_HOST'];
                 $from_email = 'admin@' . $_SERVER['HTTP_HOST'];
@@ -173,10 +174,10 @@ Class SiteWrite extends CMS_System {
 
 
         $res = $this->db->prepare("INSERT INTO MEMB_INFO (memb___id, memb__pwd, memb_name,mail_addr,mm_reg_time,sno__numb,bloc_code,ctl1_code,mail_chek) VALUES (?,?,?,?,?,'1','0','1','1');");
-        if (!$res->execute(Array($login, $md5pas,$memb_name, $email, TIME))) {
+        if (!$res->execute(Array($login, $md5pas, $memb_name, $email, TIME))) {
             throw new Exception($this->db->errorInfo());
         }
-            
+
         $arr = $this->db->query("SELECT IDENT_CURRENT('[MEMB_INFO]') AS id;")->fetch();
         $id = $arr['id'];
         return Array('id' => $id, 'pas' => $md5pas, 'email' => $email, 'login' => $login);
@@ -190,7 +191,7 @@ Class SiteWrite extends CMS_System {
         }
 
         $res = $this->db->prepare("INSERT INTO MEMB_INFO (memb___id, memb__pwd,memb_name, mail_addr,mm_reg_time,sno__numb,bloc_code,ctl1_code,mail_chek) VALUES (?,?,?,?,?,'1','0','1','1');");
-        if (!$res->execute(Array($row['login'], $row['pas'],$row['memb_name'], $row['email'],TIME))) {
+        if (!$res->execute(Array($row['login'], $row['pas'], $row['memb_name'], $row['email'], TIME))) {
             throw new Exception($this->db->errorInfo());
         }
 
@@ -240,6 +241,26 @@ Class SiteWrite extends CMS_System {
     }
 
     //--------------------------
+
+    //Добавление действия
+    function action_add($name, $title) {
+        if ($name AND $title) {
+            $res = $this->db->prepare("SELECT name FROM mm_actions WHERE name=?;");
+            $res->execute(Array($name));
+            if (!$res->fetch()) {
+                $res = $this->db->prepare("INSERT INTO mm_actions (name, title) VALUES (?, ?);");
+                $res->execute(Array($name, $title));
+                $this->cache->flush();
+            }
+        }
+    }
+    
+    //Удаление действия
+    function action_del($name){
+        $res = $this->db->prepare("DELETE FROM mm_actions WHERE name=?;");
+        $res->execute(Array($name));
+    }
+
 }
 
 ?>

@@ -396,7 +396,7 @@ description = {description}';
         $zip->addFromString('info.ini', $ini_string);
         
         $zip->addFromString('install.php', "<?php\n//Скрипт выполняется при подключении модуля\n\n\n\n\n?>");
-        $zip->addFromString('uninstall.php', '<?php\n//Скрипт выполняется при отключении модуля\n\n\n\n\n?>');
+        $zip->addFromString('uninstall.php', "<?php\n//Скрипт выполняется при отключении модуля\n\n\n\n\n?>");
         
         $zip->close();
     }
