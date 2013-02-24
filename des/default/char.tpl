@@ -1,4 +1,3 @@
-<p><a href="<?=H;?>/top">Топ персонажей</a></p>
 <div>
 <?if($char):?>
 <img src="<?=H;?>/des/<?=$theme?>/img/chars/<?=$char['class_title']['img'];?>.gif" alt="<?=$char['class_title']['name'];?>"/>

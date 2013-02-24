@@ -366,7 +366,7 @@ description = {description}';
             throw new Exception('Указите название файла для нового модуля');
         }
         
-        $fname = preg_replace('|(^[a-zA-Z0-9\-])|','!',$arr['fname']);
+        $fname = preg_replace('|([^a-zA-Z0-9\-])|','!',$arr['fname']);
         if(!$fname){
             throw new Exception('Не верное название для файла модуля');
         }

@@ -79,11 +79,16 @@ Class Warehouse extends CMS_System{
                 $item_str = str_replace("\0", '', $item_str) . '0';
             }
 
-            if ($item = Items::me()->hex2item($item_str)) {
+            try{
+                $item = Items::me()->hex2item($item_str);
                 $item['x'] = $x;
                 $item['y'] = $y;
                 $items[$item['serial']] = $item;
+            }catch(Exception $e){
+                
             }
+            
+            
             $x++;
             if ($x >= 8) {
                 $x = 0;
@@ -91,7 +96,6 @@ Class Warehouse extends CMS_System{
                 $pos++;
             }
         }
-
         $items_arr[$id] = $items;
         return $items;
     }
