@@ -166,6 +166,11 @@ Class Items extends CMS_System {
         }
         return $sbin;
     }
+    
+    //Типы предметов
+    function types(){
+        return Array('Swords','Axes','Spears','Bows & Crossbows','Staffs','Shields','Helms','Armors','Pants','Gloves','Boots','Accessories','Miscellaneous I','Miscellaneous II','Scrolls');
+    }
 
     //Item(Kor).txt парсер
     function ItemKor() {
