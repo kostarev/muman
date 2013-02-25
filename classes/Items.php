@@ -73,7 +73,7 @@ Class Items extends CMS_System {
                 . $arr['excellent_hex']                  //13,2
                 . $arr['ancient_hex']                    //15,2
                 . dechex($arr['type'])                   //17,1
-                . dechex($arr['19'])                     //19,1
+                . dechex($arr['opt108'])                     //19,1
                 . dechex($arr['h_type'])                 //20,1
                 . dechex($arr['h_val'])                  //21,1
                 . $arr['sockets'];                       //22,10
@@ -115,8 +115,8 @@ Class Items extends CMS_System {
 
         $arr['ancient'] = hexdec(substr($str, 16, 2));
         $arr['type'] = hexdec(substr($str, 18, 1));
-        //Не известный мне параметр
-        $arr['19'] = substr($str, 19, 1);
+        
+        $arr['opt108'] = substr($str, 19, 1);
         $arr['h_type'] = hexdec(substr($str, 20, 1));
         $arr['h_val'] = hexdec(substr($str, 21, 1));
         

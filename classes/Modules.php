@@ -400,6 +400,35 @@ description = {description}';
         
         $zip->close();
     }
+    
+    //Функция безвозвратной установки модуля
+    function merge($fname, $del_smod_file=false){
+        if(!$this->is_mod($fname)){
+            throw new Exception('Модуль не найден');
+        }
+        if(!$this->is_installed($fname)){
+            throw new Exception('Необходимо включить модуль');
+        }
+        
+        //Определяем id модуля
+        $mod = $this->get($fname);
+        //Удаляем записи модуля из базы
+        $res = $this->db->prepare("DELETE FROM mm_modules_files WHERE module=?;");
+        $res->execute(Array($mod['id']));
+        
+        $res = $this->db->prepare("DELETE FROM mm_modules WHERE id=?;");
+        $res -> execute(Array($mod['id']));
+        
+        //Удаление бэкапа модуля
+        if(is_file($this->back_modules_dir.'/'.$fname)){
+            unlink($this->back_modules_dir.'/'.$fname);
+        }
+        
+        //Удаление файла модуля
+        if($del_smod_file){
+        unlink($this->modules_dir.'/'.$fname);
+        }
+    }
 
 }
 
