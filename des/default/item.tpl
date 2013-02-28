@@ -51,4 +51,14 @@
 <?if($item['ancient']):?>
  <p><b>Ancient:</b> <?=$item['ancient'];?></p>
 <?endif;?>
+
+<?if($item['socks']):?>
+<p><b>Sockets:</b>
+    <br /><?=$item['socks'][0];?>
+    <br /><?=$item['socks'][1];?>
+    <br /><?=$item['socks'][2];?>
+    <br /><?=$item['socks'][3];?>
+    <br /><?=$item['socks'][4];?>
+</p>
+<?endif;?>
 </div>

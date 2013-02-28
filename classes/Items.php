@@ -19,19 +19,28 @@ Class Items extends CMS_System {
     //------------------------
     //Преобразование массива предмета в строку
     function item2hex($arr) {
+        if ($arr['id'] > 255) {
+            $arr['id'] = 255;
+        }
         $arr['id'] = dechex($arr['id']);
         if (strlen($arr['id']) < 2) {
             $arr['id'] = '0' . $arr['id'];
         }
 
+        if ($arr['level'] > 255) {
+            $arr['level'] = 255;
+        }
         $arr['level_bin'] = decbin($arr['level']);
         $strlen = strlen($arr['level_bin']);
         for ($i = $strlen; $i < 4; $i++) {
             $arr['level_bin'] = '0' . $arr['level_bin'];
         }
 
-
-        $arr['opt_bin'] = decbin(($arr['option'] - ($arr['option'] > 12) * 16) / 4);
+        $arr['opt_bin'] = ($arr['option'] - ($arr['option'] > 12) * 16) / 4;
+        if ($arr['opt_bin'] > 255) {
+            $arr['opt_bin'] = 255;
+        }
+        $arr['opt_bin'] = decbin($arr['opt_bin']);
         if (strlen($arr['opt_bin']) < 2) {
             $arr['opt_bin'] = '0' . $arr['opt_bin'];
         }
@@ -41,9 +50,17 @@ Class Items extends CMS_System {
                 . ($arr['luck'] ? '1' : '0')
                 . $arr['opt_bin'];
 
-        $arr['option_hex'] = base_convert($arr['option_bin'], 2, 16);
+
+        $arr['option_hex'] = base_convert($arr['option_bin'], 2, 10);
+        if ($arr['option_hex'] > 255) {
+            $arr['option_hex'] = 255;
+        }
+        $arr['option_hex'] = base_convert($arr['option_hex'], 10, 16);
         if (strlen($arr['option_hex']) < 2) {
             $arr['option_hex'] = '0' . $arr['option_hex'];
+        }
+        if ($arr['durability'] > 255) {
+            $arr['durability'] = 255;
         }
         $arr['durability_hex'] = dechex($arr['durability']);
         if (strlen($arr['durability_hex']) < 2) {
@@ -55,16 +72,24 @@ Class Items extends CMS_System {
             $exc_str.=$arr['excellent'][$i] ? '1' : '0';
         }
         $arr['excellent_bin'] = (($arr['option'] > 12) ? '1' : '0') . $exc_str;
-        $arr['excellent_hex'] = base_convert($arr['excellent_bin'], 2, 16);
-
+        $arr['excellent_hex'] = base_convert($arr['excellent_bin'], 2, 10);
+        if ($arr['excellent_hex'] > 255) {
+            $arr['excellent_hex'] = 255;
+        }
+        $arr['excellent_hex'] = base_convert($arr['excellent_hex'], 10, 16);
         if (strlen($arr['excellent_hex']) < 2) {
             $arr['excellent_hex'] = '0' . $arr['excellent_hex'];
         }
+        if ($arr['ancient'] > 255) {
+            $arr['ancient'] = 255;
+        }
+
         $arr['ancient_hex'] = dechex($arr['ancient']);
         if (strlen($arr['ancient_hex']) < 2) {
             $arr['ancient_hex'] = '0' . $arr['ancient_hex'];
         }
 
+        $arr['sockets_str'] = $arr['socks'][0] . $arr['socks'][1] . $arr['socks'][2] . $arr['socks'][3] . $arr['socks'][4];
 
         $str = $arr['id']
                 . $arr['option_hex']                     //0,2
@@ -73,10 +98,10 @@ Class Items extends CMS_System {
                 . $arr['excellent_hex']                  //13,2
                 . $arr['ancient_hex']                    //15,2
                 . dechex($arr['type'])                   //17,1
-                . dechex($arr['opt108'])                     //19,1
+                . dechex($arr['opt108'])                 //19,1
                 . dechex($arr['h_type'])                 //20,1
                 . dechex($arr['h_val'])                  //21,1
-                . $arr['sockets'];                       //22,10
+                . $arr['sockets_str'];                   //22,10
         return $str;
     }
 
@@ -95,52 +120,85 @@ Class Items extends CMS_System {
             throw new Exception('Не верный id предмета');
         }
         //2-4 байт
-        $arr['option_hex'] = hexdec(substr($str, 2, 2));
         //[is_skill]{1}  [level]{4}  [?]{1}  [luck]{1}  [?]{1}
-        $arr['option_bin'] = base_convert(substr($str, 2, 2), 16, 2) + 100000000;
-        $arr['is_skill'] = substr($arr['option_bin'], 1, 1);
-        $arr['level'] = bindec(substr($arr['option_bin'], 2, 4));
+        $option_bin = base_convert(substr($str, 2, 2), 16, 2) + 100000000;
+        $arr['is_skill'] = substr($option_bin, 1, 1);
+        $arr['level'] = bindec(substr($option_bin, 2, 4));
         //Ограничеваем level
         if ($arr['level'] > 13) {
             $arr['level'] = 13;
         }
-        $arr['luck'] = substr($arr['option_bin'], 6, 1);
-        $arr['option'] = bindec(substr($arr['option_bin'], 7, 2)) * 4;
+        $arr['luck'] = substr($option_bin, 6, 1);
+        $arr['option'] = bindec(substr($option_bin, 7, 2)) * 4;
 
         $arr['durability'] = hexdec(substr($str, 4, 2));
         $arr['serial'] = substr($str, 6, 8);
 
-        $arr['excellent_bin'] = base_convert(substr($str, 14, 2), 16, 2) + 10000000;
-        $arr['option'] += substr($arr['excellent_bin'], 1, 1) * 16;
+        $excellent_bin = base_convert(substr($str, 14, 2), 16, 2) + 10000000;
+        $arr['option'] += substr($excellent_bin, 1, 1) * 16;
 
         $arr['ancient'] = hexdec(substr($str, 16, 2));
         $arr['type'] = hexdec(substr($str, 18, 1));
-        
+
         $arr['opt108'] = substr($str, 19, 1);
         $arr['h_type'] = hexdec(substr($str, 20, 1));
         $arr['h_val'] = hexdec(substr($str, 21, 1));
-        
-        $harmonys = $this->harmonys();
-        if($arr['h_type'] AND $this->itemType2HarmonyType($arr['type'])){
-        $arr['harmonys'] = $harmonys[$this->itemType2HarmonyType($arr['type'])][$arr['h_type']];
+
+        //Кэширование
+        $files_data = Array();
+        if (!$files_data = $this->cache->get('files_data')) {
+            $cache_file = D . '/sys/server/cache.dat';
+            if (is_file($cache_file)) {
+                $files_data = unserialize(file_get_contents($cache_file));
+                $files_change_time = Array();
+                $files_change_time[] = filectime(D . '/sys/server/Item(Kor).txt');
+                $files_change_time[] = filectime(D . '/sys/server/ItemAddOption.txt');
+                $files_change_time[] = filectime(D . '/sys/server/JewelOfHarmonyOption.txt');
+                $files_change_time[] = filectime(D . '/sys/server/Skill(Kor).txt');
+                $max_time = max($files_change_time);
+                if ($files_data['cache_time'] < $max_time) {
+                    $files_data = Array();
+                }
+            }
+
+            if (!$files_data) {
+                $files_data['cache_time'] = TIME;
+                $files_data['harmonys'] = $this->harmonys();
+                $files_data['itemKor'] = $this->itemKor();
+                $files_data['itemAddOption'] = $this->itemAddOption();
+                $files_data['skillKor'] = $this->skillKor();
+                $this->cache->set('files_data',$files_data,600);
+                $cache_str = serialize($files_data);
+                file_put_contents($cache_file, $cache_str);
+            }
         }
-        
-        $arr['sockets'] = substr($str, -10);
+        //---------------
+
+        $harmonys = $files_data['harmonys'];
+        if ($arr['h_type'] AND $this->itemType2HarmonyType($arr['type'])) {
+            $arr['harmonys'] = $harmonys[$this->itemType2HarmonyType($arr['type'])][$arr['h_type']];
+        }
+
+        $sockets_str = substr($str, -10);
+        for ($i = 0; $i <= 4; $i++) {
+            $sock_str = substr($sockets_str, $i * 2, 2);
+            $arr['socks'][$i] = $this->sockets($sock_str);
+        }
 
         $arr['option_str'] = $this->options_name($arr['type'], $arr['level']);
         //Excellent опции
         for ($i = 1; $i <= 6; $i++) {
-            $arr['excellent'][$i] = substr($arr['excellent_bin'], $i + 1, 1);
+            $arr['excellent'][$i] = substr($excellent_bin, $i + 1, 1);
             if ($arr['excellent'][$i]) {
                 $arr['excellent_str'][] = $this->excellent_option_name($arr['type'], $i - 1, $arr['level']);
             }
         }
 
-        $itemKor = $this->itemKor();
+        $itemKor = $files_data['itemKor'];
         $arr['KOR'] = $itemKor[$arr['type']][$arr['id']];
-        $itemAddOption = $this->itemAddOption();
+        $itemAddOption = $files_data['itemAddOption'];
         $arr['addoption'] = isset($itemAddOption[$arr['type']][$arr['id']]) ? $itemAddOption[$arr['type']][$arr['id']] : Array();
-        $skillKor = $this->skillKor();
+        $skillKor = $files_data['skillKor'];
         $arr['skill'] = isset($skillKor[$arr['KOR']['skill']]) ? $skillKor[$arr['KOR']['skill']] : Array();
         $arr['type_name'] = $this->itemtype($arr['type']);
         $arr['HEX'] = $str;
@@ -166,10 +224,156 @@ Class Items extends CMS_System {
         }
         return $sbin;
     }
-    
+
     //Типы предметов
-    function types(){
-        return Array('Swords','Axes','Spears','Bows & Crossbows','Staffs','Shields','Helms','Armors','Pants','Gloves','Boots','Accessories','Miscellaneous I','Miscellaneous II','Scrolls');
+    function types() {
+        return Array('Swords', 'Axes', 'Spears', 'Bows & Crossbows', 'Staffs', 'Shields', 'Helms', 'Armors', 'Pants', 'Gloves', 'Boots', 'Accessories', 'Miscellaneous I', 'Miscellaneous II', 'Scrolls');
+    }
+
+    //Socket опции
+    function sockets($id) {
+        $arr = Array(
+            'FE' => 'No item application',
+            '00' => '',
+            '01' => 'Fire(Attack speed increase +7)',
+            '02' => 'Fire(Maximum attack/Wizardry increase +30)',
+            '03' => 'Fire(Minimum attack/Wizardry increase +20)',
+            '04' => 'Fire(Attack/Wizardry increase +20)',
+            '05' => 'Fire(AG cost decrease +40%)',
+            '0A' => 'Water(Block rating increase +10%)',
+            '0B' => 'Water(Defense increase +30)',
+            '0C' => 'Water(Shield protection increase +7%)',
+            '0D' => 'Water(Damage reduction +4%)',
+            '0E' => 'Water(Damage reflection +5%)',
+            '10' => 'Ice(Monster destruction for the Life increase +56)',
+            '11' => 'Ice(Monster destruction for the Mana increase +56)',
+            '12' => 'Ice(Skill attack increase +37)',
+            '13' => 'Ice(Attack rating increase +25)',
+            '14' => 'Ice(Item durability increase +30%)',
+            '15' => 'Wind(Automatic Life recovery increase +8)',
+            '16' => 'Wind(Maximum Life increase +4%)',
+            '17' => 'Wind(Maximum Mana increase +4%)',
+            '18' => 'Wind(Automatic Mana recovery increase +7)',
+            '19' => 'Wind(Maximum AG increase +25)',
+            '1A' => 'Wind(AG value increase +3)',
+            '1D' => 'Lightning(Excellent damage increase +15)',
+            '1E' => 'Lighting(Excellent damage rate increase +10%)',
+            '1F' => 'Lighting(Critical damage increase +30)',
+            '20' => 'Lighting(Critical damage rate increase +8%)',
+            '24' => 'Ground(Health increase +30)',
+            '32' => 'Fire((Level type)Attack/Wizardry increase +20)',
+            '33' => 'Fire(Attack speed increase +8)',
+            '34' => 'Fire(Maximum attack/Wizardry increase +32)',
+            '35' => 'Fire(Minimum attack/Wizardry increase +22)',
+            '36' => 'Fire(Attack/Wizardry increase +22)',
+            '37' => 'Fire(AG cost decrease +41%)',
+            '3C' => 'Water(Block rating increase +11%)',
+            '3D' => 'Water(Defense increase +33)',
+            '3E' => 'Water(Shield protection increase +10%)',
+            '3F' => 'Water(Damage reduction +5%)',
+            '40' => 'Water(Damage reflection +6%)',
+            '42' => 'Ice(Monster destruction for the Life increase +64)',
+            '43' => 'Ice(Monster destruction for the Mana increase +64)',
+            '44' => 'Ice(Skill attack increase +40)',
+            '45' => 'Ice(Attack rating increase +27)',
+            '46' => 'Ice(Item durability increase +32%)',
+            '47' => 'Wind(Automatic Life recovery increase +10)',
+            '48' => 'Wind(Maximum Life increase +5%)',
+            '49' => 'Wind(Maximum Mana increase +5%)',
+            '4A' => 'Wind(Automatic Mana recovery increase +14)',
+            '4B' => 'Wind(Maximum AG increase +30)',
+            '4C' => 'Wind(AG value increase +5)',
+            '4F' => 'Lightning(Excellent damage increase +20)',
+            '50' => 'Lighting(Excellent damage rate increase +11%)',
+            '51' => 'Lighting(Critical damage increase +32)',
+            '52' => 'Lighting(Critical damage rate increase +9%)',
+            '59' => 'Ground(Health increase +32)',
+            '64' => 'Fire((Level type)Attack/Wizardry increase +21)',
+            '65' => 'Fire(Attack speed increase +9)',
+            '66' => 'Fire(Maximum attack/Wizardry increase +35)',
+            '67' => 'Fire(Minimum attack/Wizardry increase +25)',
+            '68' => 'Fire(Attack/Wizardry increase +25)',
+            '69' => 'Fire(AG cost decrease +42%)',
+            '6E' => 'Water(Block rating increase +12%)',
+            '6F' => 'Water(Defense increase +36)',
+            '70' => 'Water(Shield protection increase +15%)',
+            '71' => 'Water(Damage reduction +6%)',
+            '72' => 'Water(Damage reflection +7%)',
+            '74' => 'Ice(Monster destruction for the Life increase +74)',
+            '75' => 'Ice(Monster destruction for the Mana increase +74)',
+            '76' => 'Ice(Skill attack increase +45)',
+            '77' => 'Ice(Attack rating increase +30)',
+            '78' => 'Ice(Item durability increase +34%)',
+            '79' => 'Wind(Automatic Life recovery increase +13)',
+            '7A' => 'Wind(Maximum Life increase +6%)',
+            '7B' => 'Wind(Maximum Mana increase +6%)',
+            '7C' => 'Wind(Automatic Mana recovery increase +21)',
+            '7D' => 'Wind(Maximum AG increase +35)',
+            '7E' => 'Wind(AG value increase +7)',
+            '81' => 'Lightning(Excellent damage increase +25)',
+            '82' => 'Lighting(Excellent damage rate increase +12%)',
+            '83' => 'Lighting(Critical damage increase +35)',
+            '84' => 'Lighting(Critical damage rate increase +10%)',
+            '88' => 'Ground(Health increase +34)',
+            '96' => 'Fire((Level type)Attack/Wizardry increase +22)',
+            '97' => 'Fire(Attack speed increase +10)',
+            '98' => 'Fire(Maximum attack/Wizardry increase +40)',
+            '99' => 'Fire(Minimum attack/Wizardry increase +30)',
+            '9A' => 'Fire(Attack/Wizardry increase +30)',
+            '9B' => 'Fire(AG cost decrease +43%)',
+            'A0' => 'Water(Block rating increase +13%)',
+            'A1' => 'Water(Defense increase +39)',
+            'A2' => 'Water(Shield protection increase +20%)',
+            'A3' => 'Water(Damage reduction +7%)',
+            'A4' => 'Water(Damage reflection +8%)',
+            'A6' => 'Ice(Monster destruction for the Life increase +89)',
+            'A7' => 'Ice(Monster destruction for the Mana increase +89)',
+            'A8' => 'Ice(Skill attack increase +50)',
+            'A9' => 'Ice(Attack rating increase +35)',
+            'AA' => 'Ice(Item durability increase +36%)',
+            'AB' => 'Wind(Automatic Life recovery increase +16)',
+            'AC' => 'Wind(Maximum Life increase +7%)',
+            'AD' => 'Wind(Maximum Mana increase +7%)',
+            'AE' => 'Wind(Automatic Mana recovery increase +28)',
+            'AF' => 'Wind(Maximum AG increase +40)',
+            'B0' => 'Wind(AG value increase +10)',
+            'B3' => 'Lightning(Excellent damage increase +30)',
+            'B4' => 'Lighting(Excellent damage rate increase +13%)',
+            'B5' => 'Lighting(Critical damage increase +40)',
+            'B6' => 'Lighting(Critical damage rate increase +11%)',
+            'BA' => 'Ground(Health increase +36)',
+            'C8' => 'Fire((Level type)Attack/Wizardry increase +27)',
+            'C9' => 'Fire(Attack speed increase +11)',
+            'CA' => 'Fire(Maximum attack/Wizardry increase +50)',
+            'CB' => 'Fire(Minimum attack/Wizardry increase +35)',
+            'CC' => 'Fire(Attack/Wizardry increase +35)',
+            'CD' => 'Fire(AG cost decrease +44%)',
+            'D2' => 'Water(Block rating increase +14%)',
+            'D3' => 'Water(Defense increase +42)',
+            'D4' => 'Water(Shield protection increase +30%)',
+            'D5' => 'Water(Damage reduction +8%)',
+            'D6' => 'Water(Damage reflection +9%)',
+            'D8' => 'Ice(Monster destruction for the Life increase +112)',
+            'D9' => 'Ice(Monster destruction for the Mana increase +112)',
+            'DA' => 'Ice(Skill attack increase +60)',
+            'DB' => 'Ice(Attack rating increase +40)',
+            'DC' => 'Ice(Item durability increase +38%)',
+            'DD' => 'Wind(Automatic Life recovery increase +20)',
+            'DE' => 'Wind(Maximum Life increase +8%)',
+            'DF' => 'Wind(Maximum Mana increase +8%)',
+            'E0' => 'Wind(Automatic Mana recovery increase +35)',
+            'E1' => 'Wind(Maximum AG increase +50)',
+            'E2' => 'Wind(AG value increase +15)',
+            'E5' => 'Lightning(Excellent damage increase +40)',
+            'E6' => 'Lighting(Excellent damage rate increase +14%)',
+            'E7' => 'Lighting(Critical damage increase +50)',
+            'E8' => 'Lighting(Critical damage rate increase +12%)',
+            'EC' => 'Ground(Health increase +38)'
+        );
+        if (isset($arr[$id])) {
+            return $arr[$id];
+        }
+        return 'Нет опции';
     }
 
     //Item(Kor).txt парсер
@@ -312,8 +516,8 @@ Class Items extends CMS_System {
             }
             if (preg_match('/([0-9]{1,3})[\s]+"([0-9a-zA-Z\-\)\( ]+)"[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)/', $str, $mas)) {
                 unset($mas[0]);
-                foreach($harm_keys AS $k => $v){
-                $harms[$type][$mas[1]][$v] = $mas[$k+1];
+                foreach ($harm_keys AS $k => $v) {
+                    $harms[$type][$mas[1]][$v] = $mas[$k + 1];
                 }
             }
         }

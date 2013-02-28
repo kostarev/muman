@@ -52,6 +52,14 @@ Class Cache {
         }
         return false;
     }
+    
+    //Удаление
+    function delete($key) {
+        if ($this->mem) {
+            return $this->mem->delete($key);
+        }
+        return false;
+    }
 
 }
 
