@@ -89,7 +89,7 @@ Class Items extends CMS_System {
             $arr['ancient_hex'] = '0' . $arr['ancient_hex'];
         }
 
-        $arr['sockets_str'] = $arr['socks'][0] . $arr['socks'][1] . $arr['socks'][2] . $arr['socks'][3] . $arr['socks'][4];
+        $arr['sockets_str'] = $arr['socks_hex'][0] . $arr['socks_hex'][1] . $arr['socks_hex'][2] . $arr['socks_hex'][3] . $arr['socks_hex'][4];
 
         $str = $arr['id']
                 . $arr['option_hex']                     //0,2
@@ -183,6 +183,7 @@ Class Items extends CMS_System {
         for ($i = 0; $i <= 4; $i++) {
             $sock_str = substr($sockets_str, $i * 2, 2);
             $arr['socks'][$i] = $this->sockets($sock_str);
+            $arr['socks_hex'][$i] = $sock_str;
         }
 
         $arr['option_str'] = $this->options_name($arr['type'], $arr['level']);

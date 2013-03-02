@@ -9,64 +9,21 @@ table.sys th{
     color:#ffffff;}
 table.sys th a{color:#ffffff;}
 table.sys td{background-color: #ccccff; padding:7px; text-align: center;}
-/*table.sys th{background-color: #9999ff; padding:7px; text-align: center;}
-table.sys td{background-color: #ccccff; padding:7px; text-align: center;}*/
 tr.back_green td{background-color:#99ff99;}
 tr.back_green td a{color:#ff3333;}
 input{
  border: 1px solid #cccccc; 
-   border-radius: 6px; 
-   -webkit-border-radius: 6px; /*Хром*/
-   -moz-border-radius: 5px;  /*ФайрФокс*/
-   -khtml-border-radius: 5px;  /*Сафари*/
-  background: #ffffff !important;  /*Для хромки*/
    outline: none;  /*Нет обводке!*/
-   padding-left: 10px;
-   height: 24px; 
-   width: 140px; 
-   color: #666666;
    font-size: 15px; 
    font-family: Tahoma; 
 }
 
 input:focus {
  border: 1px solid #cccccc; 
-   border-radius: 6px; 
-   -webkit-border-radius: 6px; /*Хром*/
-   -moz-border-radius: 5px;  /*ФайрФокс*/
-   -khtml-border-radius: 5px;  /*Сафари*/
-   background: #285f6d !important;  /*Для хромки*/
    outline: none;  /*Нет обводке!*/
-   padding-left: 10px;
-   height: 24px; 
-   width: 140px; 
-   color: #ffffff;
    font-size: 15px; 
    font-family: Tahoma; 
 }
-
-
-
-
-textarea:required{
- border: 1px solid #cccccc; 
-   border-radius: 6px; 
-   -webkit-border-radius: 6px; /*Хром*/
-   -moz-border-radius: 5px;  /*ФайрФокс*/
-   -khtml-border-radius: 5px;  /*Сафари*/
-  
-   outline: none;  /*Нет обводке!*/
-   padding-left: 10px;
-
-   color: #666666;
-   font-size: 15px; 
-   font-family: Tahoma; 
- background: url(redstar.gif) no-repeat right,#ffffff !important;
-
-
-}
-
-
 
 /*Листинг страниц*/
 .pages{margin-top:15px; margin-bottom:15px;}

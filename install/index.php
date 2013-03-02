@@ -133,16 +133,17 @@ if ($step == 1) {
             $res->execute(Array('0', 'kabinet', 'Кабинет', 1, 'user', '/kabinet'));
             $res->execute(Array('0', 'panel', 'Админка', 2, 'panel', '/panel'));
             $res->execute(Array('kabinet', 'anketa', 'Анкета', 0, 'user', '/user/{user->id}'));
+            $res->execute(Array('kabinet', 'kabinet-pers', 'Персонажи', 1, 'user', '/kabinet/pers'));
             $res->execute(Array('panel', 'settings', 'Настройки', 0, 'panel-settings', '/panel/settings'));
             $res->execute(Array('panel', 'access', 'Права', 1, 'root', '/panel/access'));
             $res->execute(Array('panel', 'modules', 'Модули', 4, 'change-modules', '/panel/modules'));
             $res->execute(Array('panel', 'users', 'Пользователи', 3, 'panel', '/panel/users'));
             $res->execute(Array('panel', 'menu_editor', 'Редактор меню', 2, 'menu-editor', '/panel/menu'));
+            $res->execute(Array('panel', 'update', 'Обновление', 5, 'root', '/panel/update'));
             $res->execute(Array('settings', 'set-dev', 'Разработчику', 0, 'root', '/panel/settings/developer'));
+            $res->execute(Array('settings', 'design', 'Темы оформления', 1, 'panel-settings', '/panel/design'));
+            $res->execute(Array('settings', 'set-reg', 'Регистрация', 1, 'panel-settings', '/panel/settings/reg'));
             $res->execute(Array('modules', 'mod-new', 'Добавить', 1, 'change-modules', '/panel/modules/install'));
-            $res->execute(Array('settings', 'settings', 'Темы оформления', 1, 'panel-settings', '/panel/design'));
-            $res->execute(Array('design', 'set-reg', 'Настройки', 1, 'panel-settings', '/panel/settings/reg'));
-            $res->execute(Array('kabinet', 'kabinet-pers', 'Персонажи', 1, 'user', '/kabinet/pers'));
             $res->execute(Array('modules', 'mod-installed', 'Загруженные', 0, 'change-modules', '/panel/modules/installed'));
         }
 

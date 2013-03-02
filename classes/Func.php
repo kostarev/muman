@@ -252,7 +252,7 @@ class Func {
     }
 
     //Скачивание файла
-    function download($filename, $name = '', $mimetype = '') {
+   static function download($filename, $name = '', $mimetype = '') {
         if (!file_exists($filename)) {
             throw new Exception('Файл не найден');
         }
@@ -286,7 +286,7 @@ class Func {
                 'taz' => 'application/x-gtar', 'text' => 'text/plain', 'torrent' => 'application/x-bittorrent',
                 'txt' => 'text/plain', 'wav' => 'audio/x-wav', 'xhtml' => 'application/xhtml+xml',
                 'xls' => 'application/vnd.ms-excel', 'xml' => 'application/xml',
-                'zip' => 'application/zip');
+                'zip' => 'application/zip','smod' => 'application/smod');
 
             $mimetype = isset($mimes[$type]) ? $mimes[$type] : 'application/octet-stream';
         }
@@ -323,6 +323,31 @@ class Func {
         }
         fclose($f);
         exit;
+    }
+    
+    //Получение контента по ссылке
+    static function http($url) {
+        $url = 'http://' . str_ireplace('http://', '', $url);
+        if (!$arr = parse_url($url)) {
+            throw new Exception('Ошибка разборна url(1)');
+        }
+        if (!isset($arr['host'])) {
+            throw new Exception('Ошибка разборна url(2)');
+        };
+        return file_get_contents($url);
+    }
+    
+    //Скачивание файла по ссылке
+    static function load($url,$fname){
+        set_time_limit(0);
+        $save = fopen($fname,"w");
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        //Сохраняем файл:
+        curl_setopt($ch, CURLOPT_FILE, $save);
+        curl_exec($ch);
+        curl_close($ch);
+        fclose($save);
     }
 
 }
