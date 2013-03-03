@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="<?=H;?>/des/<?=$theme?>/tooltip.css" type="text/css" media="screen" />
         <link rel="stylesheet" href="<?=H;?>/des/<?=$theme?>/menu/pro_dropdown_2.css" type="text/css" />
         <?=$this->head;?>
-        <script type="text/javascript" src="<?=H;?>/open/jquery-1.8.3.min.js"></script>
+        <script type="text/javascript" src="<?=H;?>/open/jquery-1.9.1.min.js"></script>
         <script type="text/javascript" src="<?=H;?>/des/<?=$theme?>/script.js"></script>
         <script type="text/javascript" src="<?=H;?>/des/<?=$theme?>/tooltip.js"></script>
         <script type="text/javascript" src="<?=H;?>/des/<?=$theme?>/ajax.js"></script>

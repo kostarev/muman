@@ -1,19 +1,19 @@
 jQuery(function() {
     //Отправка форм по ctrl+enter    
-    $('form[class!=ajax]').live('keypress',function(e){
+    $('form[class!=ajax]').on('keypress',function(e){
         if((e.which == 13||e.which == 10) && e.ctrlKey){
             this.submit();
         }
     }); 
     
     //Смайлы--
-    $('.smiles img').live('click',function(){
+    $('.smiles img').on('click',function(){
         var alt = $('#'+this.id).attr('alt');
         var text = $("textarea")[0].value+' '+alt;
         $("textarea")[0].value = text;
     });
     //bb коды
-    $('.bb span').live('click',function(){
+    $('.bb span').on('click',function(){
         var alt;
         if($('#'+this.id).attr('title')==null){
             alt = $('#'+this.id).attr('tooltip');
@@ -25,7 +25,7 @@ jQuery(function() {
     });
     
     //Открытие скрытых блоков--
-    $(".open").live('click',function(){
+    $(".open").on('click',function(){
         if(this.id==''){
             $(this).attr('id', 'openbutton'+Math.floor(Math.random()*1001));
         }     

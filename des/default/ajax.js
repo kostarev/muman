@@ -7,7 +7,7 @@ http://scades.ru
 
 jQuery(function() {
     //отправка формы ctrl+enter
-    $('form.ajax').live('keypress',function(e){
+    $('form.ajax').on('keypress',function(e){
         if((e.which == 13||e.which == 10) && e.ctrlKey){
             if(this.id==''){
                 $(this).attr('id', 'ajaxForm'+Math.floor(Math.random()*1001));
@@ -64,7 +64,7 @@ jQuery(function() {
      
       
     //Ajax ссылка
-    $('a.ajax').live('click',function(){
+    $('a.ajax').on('click',function(){
         if(this.id==''){
             $(this).attr('id', 'ajaxLink'+Math.floor(Math.random()*1001));
         }
