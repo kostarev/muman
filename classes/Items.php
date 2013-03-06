@@ -101,14 +101,15 @@ Class Items extends CMS_System {
                 . dechex($arr['opt108'])                 //19,1
                 . dechex($arr['h_type'])                 //20,1
                 . dechex($arr['h_val'])                  //21,1
-                . $arr['sockets_str'];                   //22,10
+                . $arr['sockets_str']                    //22,10
+                . substr($arr['HEX'],32);                //Остальной кусок HEX не трогаем
         return $str;
     }
 
     //Получение предмета из строки---
     function hex2item($str) {
         $str = preg_replace('|([^0-9a-fA-F])|', '', $str);
-        if (strlen($str) <> 32) {
+        if (strlen($str) < 32) {
             throw new Exception('Не верный HEX предмета');
         }
 
@@ -179,7 +180,7 @@ Class Items extends CMS_System {
             $arr['harmonys'] = $harmonys[$this->itemType2HarmonyType($arr['type'])][$arr['h_type']];
         }
 
-        $sockets_str = substr($str, -10);
+        $sockets_str = substr($str, 22, 10);
         for ($i = 0; $i <= 4; $i++) {
             $sock_str = substr($sockets_str, $i * 2, 2);
             $arr['socks'][$i] = $this->sockets($sock_str);
@@ -230,8 +231,9 @@ Class Items extends CMS_System {
     //Socket опции
     function sockets($id) {
         $arr = Array(
+            'FF' => 'No item application',
             'FE' => 'No item application',
-            '00' => '',
+            '00' => 'No item application',
             '01' => 'Fire(Attack speed increase +7)',
             '02' => 'Fire(Maximum attack/Wizardry increase +30)',
             '03' => 'Fire(Minimum attack/Wizardry increase +20)',

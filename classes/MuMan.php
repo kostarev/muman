@@ -34,9 +34,9 @@ Class MuMan extends CMS_System {
     //Загрузка модуля обновления
     function load_update() {
         $last = $this->last_version();
-        if($last['last_version'] == $this->version){
+        if ($last['last_version'] == $this->version) {
             throw new Exception('Версии совпадают');
-        }elseif((real)$last['last_version']<(real)$this->version){
+        } elseif ((real) $last['last_version'] < (real) $this->version) {
             throw new Exception('Ваша версия новее');
         }
         $url = $this->update_server . '/get/' . $this->version();
@@ -67,9 +67,35 @@ Class MuMan extends CMS_System {
 
     //Получаем инфу из MEMB_STAT
     function get_memb_stat($id) {
+        static $arr;
+        if (isset($arr[$id])) {
+            return $arr[$id];
+        }
         $res = $this->db->prepare("SELECT * FROM MEMB_STAT WHERE memb___id=?;");
         $res->execute(Array($id));
-        return $res->fetch();
+        $arr[$id] = $res->fetch();
+        return $arr[$id];
+    }
+
+    //Онлайн ли пользователь
+    function is_online($user_id) {
+        static $arr;
+        if (isset($arr[$user_id])) {
+            return $arr[$user_id];
+        }
+        if ($stat = $this->get_memb_stat($user_id) AND $stat['ConnectStat']) {
+            $arr[$user_id] = true;
+        } else {
+            $arr[$user_id] = false;
+        }
+        return $arr[$user_id];
+    }
+    
+    //Запрет для онлайн юзеров
+    function offline_only($user_id){
+        if($this->is_online($user_id)){
+            throw new Exception('Не доступно, для пользователей, находящихся в игре');
+        }
     }
 
 }
