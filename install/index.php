@@ -204,7 +204,7 @@ if ($step == 1) {
         //Добавляем колонку reset в Character если её нет
         $res = $db->query("SELECT 1 FROM INFORMATION_SCHEMA.Columns WHERE TABLE_NAME = 'Character' AND COLUMN_NAME='reset';");
         if (!$rows = $res->fetchAll()) {
-            $db->query("ALTER TABLE MEMB_INFO ADD reset int DEFAULT (0);");
+            $db->query("ALTER TABLE Character ADD reset int DEFAULT (0);");
         }
 
         header('location:index.php?s=2');

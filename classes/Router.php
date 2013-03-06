@@ -16,6 +16,13 @@ Class Router extends CMS_System {
     
     protected function __construct() {
         parent::__construct();
+        //Проверяем, что юзера нет в игре--------
+         if ($stat = MuMan::me()->get_memb_stat($this->user['memb___id'])) {
+            if ($stat['ConnectStat']) {
+                $this->error('Сайт не доступен, пока Вы находитесь в игре.');
+            }
+        }
+        //---------------------------------------
     }
     //-----------------
 

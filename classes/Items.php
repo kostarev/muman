@@ -226,10 +226,6 @@ Class Items extends CMS_System {
         return $sbin;
     }
 
-    //Типы предметов
-    function types() {
-        return Array('Swords', 'Axes', 'Spears', 'Bows & Crossbows', 'Staffs', 'Shields', 'Helms', 'Armors', 'Pants', 'Gloves', 'Boots', 'Accessories', 'Miscellaneous I', 'Miscellaneous II', 'Scrolls');
-    }
 
     //Socket опции
     function sockets($id) {
@@ -528,7 +524,7 @@ Class Items extends CMS_System {
     //Тип предмета в название
     function itemtype($type) {
         $type = (int) $type;
-        $arr = $this->item_types();
+        $arr = $this->types();
         if (!isset($arr[$type])) {
             return 'Не найдено';
         }
@@ -536,7 +532,7 @@ Class Items extends CMS_System {
     }
 
     //Массив типов предметов
-    function item_types() {
+    function types() {
         return Array('Swords', 'Axes', 'Maces & Scepters', 'Spears', 'Bows & Crossbows', 'Staffs', 'Shields', 'Helms', 'Armors', 'Pants', 'Gloves', 'Boots', 'Accessories', 'Miscellaneous I', 'Miscellaneous II', 'Scrolls');
     }
 
