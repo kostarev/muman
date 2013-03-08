@@ -29,7 +29,7 @@
     <?else:?>
 <script type="text/javascript">
 jQuery(function() {
-    $('a.show_pers').live('click',function(){
+    $('a.show_pers').on('click',function(){
     action = this + '&ajax';
     $("#chars_cont").hide("fast");
     $("#chars").show();
