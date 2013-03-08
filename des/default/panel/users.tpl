@@ -54,7 +54,7 @@ jQuery(function() {
     <?if($pages):?><div class="pages"><?=$pages;?></div><?endif;?>
     <?endif;?>
 
-    <div id="chars_cont" style="z-index:10;font-size:xx-small; display:none;position: fixed; right: 200px; top:200px; border:solid 1px #cccccc; width:auto;background-color: #ffffff;padding:5px;">
+    <div id="chars_cont" style="z-index:10;font-size:xx-small; display:none;position: fixed; right: 50px; top:100px; border:solid 1px #cccccc; width:auto;background-color: #ffffff;padding:5px;">
         <span class="open" style="float:right;" title="Закрыть">X</span>
         <div class="close" id="chars" style="max-height: 400px;overflow: auto;"></div>
     </div>

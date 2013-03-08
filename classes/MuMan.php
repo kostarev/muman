@@ -15,7 +15,7 @@ Class MuMan extends CMS_System {
 
     protected function __construct() {
         parent::__construct();
-        $this->version = '1.0';
+        $this->version = '1.0.1';
         $this->version_type = 'betta';
         $this->update_server = 'http://muman.ru/update';
     }
