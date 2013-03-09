@@ -197,6 +197,9 @@ Class Items extends CMS_System {
         }
 
         $itemKor = $files_data['itemKor'];
+        if(!isset($itemKor[$arr['type']][$arr['id']])){
+            throw new Exception('Ошибка получения предмета Type: '.$arr['type'].' ID: '.$arr['id']);
+        }
         $arr['KOR'] = $itemKor[$arr['type']][$arr['id']];
         $itemAddOption = $files_data['itemAddOption'];
         $arr['addoption'] = isset($itemAddOption[$arr['type']][$arr['id']]) ? $itemAddOption[$arr['type']][$arr['id']] : Array();
@@ -377,6 +380,13 @@ Class Items extends CMS_System {
 
     //Item(Kor).txt парсер
     function ItemKor() {
+        
+        if(SEASON == 7){
+            return $this->ItemListSettings_ex700();
+        }elseif(SEASON == 6){
+            return $this->ItemListSettings();
+        }
+        
         static $items;
         if (isset($items)) {
             return $items;
@@ -422,6 +432,67 @@ Class Items extends CMS_System {
                 foreach ($mas AS $k => $v) {
                     if (isset($keys[$type][$k - 1])) {
                         $items[$type][$mas[1]][$keys[$type][$k - 1]] = $v;
+                    }
+                }
+            }
+        }
+        return $items;
+    }
+    
+    
+    //ItemListSettings.ini парсер
+    function ItemListSettings() {
+        
+    return;
+    }
+    
+     //ItemListSettings_ex700.ini парсер
+    function ItemListSettings_ex700() {
+        static $items;
+        if (isset($items)) {
+            return $items;
+        }
+        $file = D . '/sys/server/ItemListSettings_ex700.ini';
+        if (!is_file($file)) {
+            throw new Exception('Поместите файл ItemListSettings_ex700.ini в папку sys/server');
+        }
+
+        $items = Array();
+        $arr = file($file);
+
+        //Ключи для разных типов предмета
+        $keys = Array();
+        $keys[0] = Array('texture','model','type', 'id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'mindmg', 'maxdmg', 'attspeed', 'dur', 'magdur', 'magpower', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[1] = $keys[0];
+        $keys[2] = $keys[0];
+        $keys[3] = $keys[0];
+        $keys[4] = $keys[0];
+        $keys[5] = $keys[0];
+        $keys[6] = Array('texture','model','type','id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'successblock', 'dur', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[7] = Array('texture','model','type','id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'magdef', 'dur', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[8] = $keys[7];
+        $keys[9] = $keys[7];
+        $keys[10] = $keys[7];
+        $keys[11] = $keys[7];
+        $keys[12] = Array('texture','model','type','id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'dur', 'lvlreq', 'enereq', 'strreq', 'dexreq', 'comreq', 'buymoney', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[13] = Array('texture','model','type','id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'dur', 'res1', 'res2', 'res3', 'res4', 'res5', 'res6', 'res7', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[14] = Array('texture','model','type','id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'value', 'level');
+        $keys[15] = Array('texture','model','type','id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'lvlreq', 'enereq', 'buymoney', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+
+        foreach ($arr AS $str) {
+            //Номер категории
+            if (is_numeric(trim($str))) {
+                $type = (int) trim($str);
+                continue;
+            }
+
+            //Страшная регулярка, но лучше способ не придумал
+            if (preg_match('/"([0-9a-zA-Z\-\\\ ]+)"[\s]+"([0-9a-zA-Z\-\._ ]+)"[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9\-]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+"([0-9a-zA-Z\-\)\(\[\]\' ]+)"[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})/', $str, $mas)) {
+                unset($mas[0]);
+
+                foreach ($mas AS $k => $v) {
+                    if (isset($keys[$type][$k - 1])) {
+                        $items[$type][$mas[4]][$keys[$type][$k - 1]] = $v;
                     }
                 }
             }

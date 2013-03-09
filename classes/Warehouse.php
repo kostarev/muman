@@ -56,7 +56,6 @@ Class Warehouse extends CMS_System{
             return Array();
         }
 
-        //Убираем Null байты
         $str = $row['Items'];
 
         //Обрезаем 0x
@@ -72,9 +71,9 @@ Class Warehouse extends CMS_System{
         $x = 0;
         $y = 0;
 
-        while ($i < 120 AND $item_str = substr($str, $pos, 32)) {
+        while ($i < 120 AND $item_str = substr($str, $pos, ITEM_HEX_LEN)) {
             $i++;
-            $pos += 32;
+            $pos += ITEM_HEX_LEN;
             if (substr_count($item_str, "\0")) {
                 $item_str = str_replace("\0", '', $item_str) . '0';
             }

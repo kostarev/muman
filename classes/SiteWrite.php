@@ -142,8 +142,8 @@ Class SiteWrite extends CMS_System {
         if (MD5) {
             $res = $this->db->prepare("SELECT [dbo].[fn_md5](?,?) AS pas;");
             $res->execute(Array($pas, $login));
-            $arr = $res->fetch();
-            $md5pas = $arr['pas'];
+            $arrs = $res->fetch();
+            $md5pas = $arrs['pas'];
         } else {
             $md5pas = $pas;
         }
