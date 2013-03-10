@@ -105,6 +105,8 @@ Class Chars extends CMS_System {
         $class[82]['img'] = 'sm';
         $class[83]['name'] = 'Dimension Master';
         $class[83]['img'] = 'sm';
+        $class[96]['name'] = 'Rage Fighter';
+        $class[96]['img'] = 'rf';
 
         return isset($class[$value]) ? $class[$value] : Array('name' => 'Unknown', 'img' => 0);
     }

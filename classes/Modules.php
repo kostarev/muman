@@ -238,12 +238,14 @@ Class Modules extends CMS_System {
         $zip->close();
 
         //Возвращаем забэкапленные файлы если есть
+        if(is_file($this->back_modules_dir . '/' . $fname . '.zip')){
         if ($zip->open($this->back_modules_dir . '/' . $fname . '.zip') === true) {
             $zip->extractTo(D);
             $zip->close();
         }
-
+        
         unlink($this->back_modules_dir . '/' . $fname . '.zip');
+        }
 
         $this->cache->flush();
     }

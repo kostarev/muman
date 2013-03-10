@@ -9,5 +9,10 @@
     <p><input type="text" name="DB_NAME" placeholder="Имя базы" value="muonline" /></p>
     <p><input type="text" name="DB_DRIVER" placeholder="Драйвер для доступа к базе" value="{SQL Server Native Client 10.0}" /></p>
     <p>Возможные варианты драйвера: <br />{SQL Server}<br />{SQL Server Native Client 10.0}</p>
+    <p>Сезон: <select name="season">
+        <option value="4">4</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+    </select></p>
 <p><input type="submit" value="Ок" /></p>
 </form>

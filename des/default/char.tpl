@@ -1,6 +1,6 @@
 <div>
 <?if($char):?>
-<img src="<?=H;?>/des/<?=$theme?>/img/chars/<?=$char['class_title']['img'];?>.gif" alt="<?=$char['class_title']['name'];?>"/>
+<img src="<?=H;?>/des/<?=$theme?>/img/chars/<?=$char['class_title']['img'];?>.jpg" alt="<?=$char['class_title']['name'];?>"/>
 <table class="sys" style="width:500px;">
 <tr><th>Параметр</th><th>Значение</th></tr>
 <tr><td>Класс</td><td> <?=$char['class_title']['name'];?></td></tr>

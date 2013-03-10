@@ -62,8 +62,10 @@ Class Warehouse extends CMS_System{
         if (substr($str, 0, 2) == '0x') {
             $str = substr($str, 2);
         }
-
-    
+        
+        //Определяем длину HEX предмета
+        $item_hex_len = 32 * ceil(floor(strlen($str) / 120) / 32);
+        
         $items = Array();
         $pos = 0;
         $i = 0;
@@ -71,12 +73,15 @@ Class Warehouse extends CMS_System{
         $x = 0;
         $y = 0;
 
-        while ($i < 120 AND $item_str = substr($str, $pos, ITEM_HEX_LEN)) {
+        while ($i < 120 AND $item_str = substr($str, $pos, $item_hex_len)) {
             $i++;
-            $pos += ITEM_HEX_LEN;
+            $pos += $item_hex_len;
             if (substr_count($item_str, "\0")) {
                 $item_str = str_replace("\0", '', $item_str) . '0';
             }
+            
+            //Обрезаем лишнее в HEX
+            $item_str = substr($item_str, 0, 32);
 
             try{
                 $item = Items::me()->hex2item($item_str);

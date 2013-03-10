@@ -13,8 +13,7 @@ define('LANGUAGE', 'ru');
 //Используется ли md5 для шифрования пароля
 define('MD5', {MD5});
 //Сезон
-define('SEASON', 4);
-define('ITEM_HEX_LEN', 32);
+define('SEASON', {SEASON});
 //колонка Reset
 define('RESET', 'reset');
 //Кэширование

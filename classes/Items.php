@@ -101,8 +101,8 @@ Class Items extends CMS_System {
                 . dechex($arr['opt108'])                 //19,1
                 . dechex($arr['h_type'])                 //20,1
                 . dechex($arr['h_val'])                  //21,1
-                . $arr['sockets_str']                    //22,10
-                . substr($arr['HEX'],32);                //Остальной кусок HEX не трогаем
+                . $arr['sockets_str'];                    //22,10
+              //  . substr($arr['HEX'], 32);                //Остальной кусок HEX не трогаем
         return $str;
     }
 
@@ -168,7 +168,7 @@ Class Items extends CMS_System {
                 $files_data['itemKor'] = $this->itemKor();
                 $files_data['itemAddOption'] = $this->itemAddOption();
                 $files_data['skillKor'] = $this->skillKor();
-                $this->cache->set('files_data',$files_data,600);
+                $this->cache->set('files_data', $files_data, 600);
                 $cache_str = serialize($files_data);
                 file_put_contents($cache_file, $cache_str);
             }
@@ -197,8 +197,8 @@ Class Items extends CMS_System {
         }
 
         $itemKor = $files_data['itemKor'];
-        if(!isset($itemKor[$arr['type']][$arr['id']])){
-            throw new Exception('Ошибка получения предмета Type: '.$arr['type'].' ID: '.$arr['id']);
+        if (!isset($itemKor[$arr['type']][$arr['id']])) {
+            throw new Exception('Ошибка получения предмета Type: ' . $arr['type'] . ' ID: ' . $arr['id']);
         }
         $arr['KOR'] = $itemKor[$arr['type']][$arr['id']];
         $itemAddOption = $files_data['itemAddOption'];
@@ -230,13 +230,12 @@ Class Items extends CMS_System {
         return $sbin;
     }
 
-
     //Socket опции
     function sockets($id) {
         $arr = Array(
-            'FF' => 'No item application',
-            'FE' => 'No item application',
-            '00' => 'No item application',
+            'FF' => '',
+            'FE' => '',
+            '00' => '',
             '01' => 'Fire(Attack speed increase +7)',
             '02' => 'Fire(Maximum attack/Wizardry increase +30)',
             '03' => 'Fire(Minimum attack/Wizardry increase +20)',
@@ -379,14 +378,16 @@ Class Items extends CMS_System {
     }
 
     //Item(Kor).txt парсер
-    function ItemKor() {
-        
-        if(SEASON == 7){
-            return $this->ItemListSettings_ex700();
-        }elseif(SEASON == 6){
-            return $this->ItemListSettings();
+    function ItemKor($item_file = '') {
+
+        if (!$item_file) {
+            if (SEASON == 7) {
+                return $this->ItemKor7('items7.ini');
+            } elseif (SEASON == 6) {
+                return $this->ItemKor('items6.txt');
+            }
         }
-        
+
         static $items;
         if (isset($items)) {
             return $items;
@@ -401,22 +402,22 @@ Class Items extends CMS_System {
 
         //Ключи для разных типов предмета
         $keys = Array();
-        $keys[0] = Array('id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'mindmg', 'maxdmg', 'attspeed', 'dur', 'magdur', 'magpower', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[0] = Array('id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'mindmg', 'maxdmg', 'attspeed', 'dur', 'magdur', 'magpower', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum', 'rf');
         $keys[1] = $keys[0];
         $keys[2] = $keys[0];
         $keys[3] = $keys[0];
         $keys[4] = $keys[0];
         $keys[5] = $keys[0];
-        $keys[6] = Array('id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'successblock', 'dur', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
-        $keys[7] = Array('id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'magdef', 'dur', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[6] = Array('id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'successblock', 'dur', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum', 'rf');
+        $keys[7] = Array('id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'magdef', 'dur', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum', 'rf');
         $keys[8] = $keys[7];
         $keys[9] = $keys[7];
         $keys[10] = $keys[7];
         $keys[11] = $keys[7];
-        $keys[12] = Array('id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'dur', 'lvlreq', 'enereq', 'strreq', 'dexreq', 'comreq', 'buymoney', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
-        $keys[13] = Array('id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'dur', 'res1', 'res2', 'res3', 'res4', 'res5', 'res6', 'res7', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[12] = Array('id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'dur', 'lvlreq', 'enereq', 'strreq', 'dexreq', 'comreq', 'buymoney', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum', 'rf');
+        $keys[13] = Array('id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'dur', 'res1', 'res2', 'res3', 'res4', 'res5', 'res6', 'res7', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum', 'rf');
         $keys[14] = Array('id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'value', 'level');
-        $keys[15] = Array('id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'lvlreq', 'enereq', 'buymoney', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[15] = Array('id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'lvlreq', 'enereq', 'buymoney', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum', 'rf');
 
         foreach ($arr AS $str) {
             //Номер категории
@@ -426,7 +427,7 @@ Class Items extends CMS_System {
             }
 
             //Страшная регулярка, но лучше способ не придумал
-            if (preg_match('/([0-9]+)[\s]+([0-9\-]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+"([0-9a-zA-Z\-\)\(\[\]\' ]+)"[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})/', $str, $mas)) {
+            if (preg_match('/([0-9]+)[\s]+([0-9\-]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+"([0-9a-zA-Z\-\)\(\[\]\' ]+)"[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})[\s]{0,}([0-9]{0,})/', $str, $mas)) {
                 unset($mas[0]);
 
                 foreach ($mas AS $k => $v) {
@@ -438,23 +439,17 @@ Class Items extends CMS_System {
         }
         return $items;
     }
-    
-    
-    //ItemListSettings.ini парсер
-    function ItemListSettings() {
-        
-    return;
-    }
-    
-     //ItemListSettings_ex700.ini парсер
-    function ItemListSettings_ex700() {
+
+
+    //ItemListSettings_ex700.ini парсер
+    function ItemKor7($item_file) {
         static $items;
         if (isset($items)) {
             return $items;
         }
-        $file = D . '/sys/server/ItemListSettings_ex700.ini';
+        $file = D . '/sys/server/' . $item_file;
         if (!is_file($file)) {
-            throw new Exception('Поместите файл ItemListSettings_ex700.ini в папку sys/server');
+            throw new Exception('Поместите файл ' . $item_file . ' в папку sys/server');
         }
 
         $items = Array();
@@ -462,22 +457,22 @@ Class Items extends CMS_System {
 
         //Ключи для разных типов предмета
         $keys = Array();
-        $keys[0] = Array('texture','model','type', 'id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'mindmg', 'maxdmg', 'attspeed', 'dur', 'magdur', 'magpower', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[0] = Array('texture', 'model', 'type', 'id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'mindmg', 'maxdmg', 'attspeed', 'dur', 'magdur', 'magpower', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
         $keys[1] = $keys[0];
         $keys[2] = $keys[0];
         $keys[3] = $keys[0];
         $keys[4] = $keys[0];
         $keys[5] = $keys[0];
-        $keys[6] = Array('texture','model','type','id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'successblock', 'dur', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
-        $keys[7] = Array('texture','model','type','id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'magdef', 'dur', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[6] = Array('texture', 'model', 'type', 'id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'successblock', 'dur', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[7] = Array('texture', 'model', 'type', 'id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'magdef', 'dur', 'lvlreq', 'strreq', 'agireq', 'enereq', 'vitreq', 'cmdreq', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
         $keys[8] = $keys[7];
         $keys[9] = $keys[7];
         $keys[10] = $keys[7];
         $keys[11] = $keys[7];
-        $keys[12] = Array('texture','model','type','id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'dur', 'lvlreq', 'enereq', 'strreq', 'dexreq', 'comreq', 'buymoney', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
-        $keys[13] = Array('texture','model','type','id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'dur', 'res1', 'res2', 'res3', 'res4', 'res5', 'res6', 'res7', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
-        $keys[14] = Array('texture','model','type','id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'value', 'level');
-        $keys[15] = Array('texture','model','type','id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'lvlreq', 'enereq', 'buymoney', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[12] = Array('texture', 'model', 'type', 'id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'def', 'dur', 'lvlreq', 'enereq', 'strreq', 'dexreq', 'comreq', 'buymoney', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[13] = Array('texture', 'model', 'type', 'id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'dur', 'res1', 'res2', 'res3', 'res4', 'res5', 'res6', 'res7', 'setattr', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
+        $keys[14] = Array('texture', 'model', 'type', 'id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'value', 'level');
+        $keys[15] = Array('texture', 'model', 'type', 'id', 'slot', 'skill', 'x', 'y', 'serial', 'option', 'drop', 'name', 'level', 'lvlreq', 'enereq', 'buymoney', 'dw/sm', 'dk/bk', 'elf/me', 'mg', 'dl', 'sum');
 
         foreach ($arr AS $str) {
             //Номер категории

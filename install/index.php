@@ -30,6 +30,7 @@ if ($step == 1) {
         $str = str_replace('{DB_NAME}', $_POST['DB_NAME'], $str);
         $str = str_replace('{DB_USER}', $_POST['DB_USER'], $str);
         $str = str_replace('{DB_PASSWORD}', $_POST['DB_PASSWORD'], $str);
+        $str = str_replace('{SEASON}', $_POST['season'], $str);
 
         //Определяем, используется ли MD5
         $res = $db->query("SELECT DATA_TYPE FROM information_schema.columns WHERE TABLE_NAME = 'MEMB_INFO' AND COLUMN_NAME='memb__pwd';");
