@@ -207,6 +207,7 @@ Class Items extends CMS_System {
         $arr['skill'] = isset($skillKor[$arr['KOR']['skill']]) ? $skillKor[$arr['KOR']['skill']] : Array();
         $arr['type_name'] = $this->itemtype($arr['type']);
         $arr['HEX'] = $str;
+        $arr['img'] = $arr['type'].'-'.$arr['id'].'.gif';
         return $arr;
     }
 
