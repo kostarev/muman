@@ -8,16 +8,16 @@ define('H', str_replace($_SERVER['DOCUMENT_ROOT'], 'http://' . $_SERVER['HTTP_HO
 
 $step = isset($_GET['s']) ? (int) $_GET['s'] : 1;
 
-        //Проверяем наличие класса PDO
-        if (!class_exists('PDO')) {
-            include '_head.tpl';
-            echo 'Класс <b>PDO</b> не найден<br />
+//Проверяем наличие класса PDO
+if (!class_exists('PDO')) {
+    include '_head.tpl';
+    echo 'Класс <b>PDO</b> не найден<br />
                 Установите PDO<br />
                 Раскомментируйте строку <b>extension=php_pdo_odbc.dll</b>
 ';
-            include '_foot.tpl';
-            exit;
-        }
+    include '_foot.tpl';
+    exit;
+}
 
 if ($step == 1) {
     if (isset($_POST['DB_SERVER'])) {
@@ -65,6 +65,12 @@ if ($step == 1) {
         //Сохраняем конфиг
         file_put_contents(D . '/sys/config.php', $str);
 
+        //Определяем collation memb___id
+        $res = $this->db->query("SELECT COLLATION_NAME FROM INFORMATION_SCHEMA.Columns WHERE TABLE_NAME = 'MEMB_INFO' AND COLUMN_NAME='memb___id';");
+        $row = $res->fetch();
+        $memb_collation = $row['COLLATION_NAME'];
+
+
         $res = $db->query("SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'mm_actions';");
         //Если нет таблицы, создаём ее
         if (!$rows = $res->fetchAll()) {
@@ -102,11 +108,11 @@ if ($step == 1) {
 )");
 
             $res = $db->prepare("INSERT INTO mm_config (mother, [name], title, [type], [value], [group]) VALUES (?, ?, ?, ?, ?, ?);");
-            $res->execute(Array('0','developer','Разработчику','text', 'directory','root'));
+            $res->execute(Array('0', 'developer', 'Разработчику', 'text', 'directory', 'root'));
             $res->execute(Array('0', 'reg', 'Регистрация', 'text', 'directory', ''));
             $res->execute(Array('0', 'des', 'design', 'text', 'default', ''));
             $res->execute(Array('developer', 'memcache_table', 'Memcache таблица', 'checkbox', '0', ''));
-            $res->execute(Array('developer', 'params_table','Данные php роутера', 'checkbox', '0', ''));
+            $res->execute(Array('developer', 'params_table', 'Данные php роутера', 'checkbox', '0', ''));
             $res->execute(Array('developer', 'sql_table', 'Таблица SQL запросов', 'checkbox', '0', ''));
             $res->execute(Array('developer', 'tpl_borders', 'Границы шаблонов в html комментариях', 'checkbox', '0', ''));
             $res->execute(Array('reg', 'captcha', 'Captcha при регистрации', 'checkbox', '1', ''));
@@ -126,9 +132,9 @@ if ($step == 1) {
 )");
 
             $res = $db->prepare("INSERT INTO mm_groups ([name], title) VALUES (?, ?);");
-            $res->execute(Array('root','Супер Админ'));
-            $res->execute(Array('admin','Админ'));
-            $res->execute(Array('user','Пользователь'));
+            $res->execute(Array('root', 'Супер Админ'));
+            $res->execute(Array('admin', 'Админ'));
+            $res->execute(Array('user', 'Пользователь'));
         }
 
         $res = $db->query("SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'mm_menu';");
@@ -186,7 +192,7 @@ if ($step == 1) {
         //Если нет таблицы, создаём ее
         if (!$rows = $res->fetchAll()) {
             $db->query("CREATE TABLE mm_tmp_users (
-  [login]    varchar(10) NOT NULL,
+  [login]    varchar(10) COLLATE $memb_collation NOT NULL,
   pas        varchar(10),
   email      varchar(50),
   code       varchar(50),
@@ -249,7 +255,7 @@ if ($step == 1) {
             include '_foot.tpl';
             exit;
         }
-        
+
         //Устанавливаем права супер админа
         $res = $db->prepare("UPDATE MEMB_INFO SET mm_group='root' WHERE memb___id=?;");
         $res->execute(Array($_POST['login']));
