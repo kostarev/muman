@@ -318,13 +318,15 @@ Class Controller_login Extends Controller_Base {
                     $res->execute(Array($_POST['pas'], $info['login']));
                     $arr = $res->fetch();
                     $md5pas = $arr['pas'];
+                    $bin_pas = Items::me()->hextobin($arr['pas']);
                 } else {
                     $md5pas = $_POST['pas'];
+                    $bin_pas = $_POST['pas'];
                 }
 
 
                 $res = $this->db->prepare("UPDATE MEMB_INFO SET memb__pwd=? WHERE memb___id=?;");
-                $res->execute(Array($md5pas, $info['login']));
+                $res->execute(Array($bin_pas, $info['login']));
                 $res = $this->db->prepare("DELETE FROM mm_tmp_users WHERE code=?;");
                 $res->execute(Array($this->args[0]));
                 $this->des->set('change_pass_success', true);

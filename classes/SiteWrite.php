@@ -144,10 +144,12 @@ Class SiteWrite extends CMS_System {
             $res->execute(Array($pas, $login));
             $arrs = $res->fetch();
             $md5pas = $arrs['pas'];
+            $bin_pas = Items::me()->hextobin($md5pas);
         } else {
             $md5pas = $pas;
+            $bin_pas = $pas;
         }
-
+        
         //Если требуется подтверждение $email--
         if ($this->conf['reg']['email_must']) {
             if (!$email) {
@@ -172,12 +174,10 @@ Class SiteWrite extends CMS_System {
 
         //-------------------------------------
 
-
-        $res = $this->db->prepare("INSERT INTO MEMB_INFO (memb___id, memb__pwd, memb_name,mail_addr,mm_reg_time,sno__numb,bloc_code,ctl1_code,mail_chek) VALUES (?,?,?,?,?,'1','0','1','1');");
-        if (!$res->execute(Array($login, $md5pas, $memb_name, $email, TIME))) {
-            throw new Exception($this->db->errorInfo());
-        }
-
+        
+        $res = $this->db->prepare("INSERT INTO MEMB_INFO (memb___id, memb__pwd, memb_name,mail_addr,mm_reg_time,sno__numb,bloc_code,ctl1_code,mail_chek) VALUES (?,?,?,?,?,'1','0','1','1');");       
+        $res->execute(Array($login, $bin_pas, $memb_name, $email, TIME));
+      
         $arr = $this->db->query("SELECT IDENT_CURRENT('[MEMB_INFO]') AS id;")->fetch();
         $id = $arr['id'];
         return Array('id' => $id, 'pas' => $md5pas, 'email' => $email, 'login' => $login);
@@ -189,9 +189,15 @@ Class SiteWrite extends CMS_System {
         if (!$row = $res->fetch()) {
             throw new Exception('Не верная ссылка, возможно она устарела. Пройдите регистрацию ещё раз.');
         }
+        
+        if (MD5) {
+            $bin_pas = Items::me()->hextobin($row['pas']);
+        } else {
+            $bin_pas = $row['pas'];
+        }
 
         $res = $this->db->prepare("INSERT INTO MEMB_INFO (memb___id, memb__pwd,memb_name, mail_addr,mm_reg_time,sno__numb,bloc_code,ctl1_code,mail_chek) VALUES (?,?,?,?,?,'1','0','1','1');");
-        if (!$res->execute(Array($row['login'], $row['pas'], $row['memb_name'], $row['email'], TIME))) {
+        if (!$res->execute(Array($row['login'], $bin_pas, $row['memb_name'], $row['email'], TIME))) {
             throw new Exception($this->db->errorInfo());
         }
 
