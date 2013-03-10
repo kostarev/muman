@@ -102,7 +102,7 @@ Class Items extends CMS_System {
                 . dechex($arr['h_type'])                 //20,1
                 . dechex($arr['h_val'])                  //21,1
                 . $arr['sockets_str'];                    //22,10
-              //  . substr($arr['HEX'], 32);                //Остальной кусок HEX не трогаем
+        //  . substr($arr['HEX'], 32);                //Остальной кусок HEX не трогаем
         return $str;
     }
 
@@ -378,23 +378,23 @@ Class Items extends CMS_System {
     }
 
     //Item(Kor).txt парсер
-    function ItemKor($item_file = '') {
+    function ItemKor() {
 
-        if (!$item_file) {
-            if (SEASON == 7) {
-                return $this->ItemKor7('items7.ini');
-            } elseif (SEASON == 6) {
-                return $this->ItemKor('items6.txt');
-            }
+        if (SEASON == 7) {
+            return $this->ItemKor7('items7.ini');
+        } elseif (SEASON == 6) {
+            $item_file = 'items6.txt';
+        } else {
+            $item_file = 'Item(Kor).txt';
         }
 
         static $items;
         if (isset($items)) {
             return $items;
         }
-        $file = D . '/sys/server/Item(Kor).txt';
+        $file = D . '/sys/server/' . $item_file;
         if (!is_file($file)) {
-            throw new Exception('Поместите файл Item(Kor).txt в папку sys/server');
+            throw new Exception('Поместите файл ' . $item_file . ' в папку sys/server');
         }
 
         $items = Array();
@@ -439,7 +439,6 @@ Class Items extends CMS_System {
         }
         return $items;
     }
-
 
     //ItemListSettings_ex700.ini парсер
     function ItemKor7($item_file) {
