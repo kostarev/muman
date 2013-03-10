@@ -66,7 +66,7 @@ if ($step == 1) {
         file_put_contents(D . '/sys/config.php', $str);
 
         //Определяем collation memb___id
-        $res = $this->db->query("SELECT COLLATION_NAME FROM INFORMATION_SCHEMA.Columns WHERE TABLE_NAME = 'MEMB_INFO' AND COLUMN_NAME='memb___id';");
+        $res = $db->query("SELECT COLLATION_NAME FROM INFORMATION_SCHEMA.Columns WHERE TABLE_NAME = 'MEMB_INFO' AND COLUMN_NAME='memb___id';");
         $row = $res->fetch();
         $memb_collation = $row['COLLATION_NAME'];
 

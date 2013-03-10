@@ -108,18 +108,15 @@ Class Warehouse extends CMS_System{
     function add_item($id, $HEX){
         //Проверяем нет ли в сундуке предмета с тем же serial
         $items = $this->get_items($id);
+        $item = Items::me()->hex2item($HEX);
 
-        if (isset($items[$item_id])) {
-            
-            //Меняем serial перемещаемого предмета
-            $serial = $item_id;
-            while (isset($items[$serial])) {
-                $serial = Func::rand_string(8, '0123456789ABCDEF');
+            //Меняем serial перемещаемого предмета, если такой уже есть
+            while (isset($items[$item['serial']])) {
+                $item['serial'] = Func::rand_string(8, '0123456789ABCDEF');
+                 //Формируем новый HEX предмета с учётом нового serial
+                $item['HEX'] = Items::me()->item2hex($item);   
             }
-            //Формируем новый HEX предмета с учётом нового serial
-            $web_items[$item_id]['serial'] = $serial;
-            $web_items[$item_id]['HEX'] = Items::me()->item2hex($web_items[$item_id]);
-        }
+        
 
 
         //Ищем свободное место для предмета
@@ -145,8 +142,8 @@ Class Warehouse extends CMS_System{
         }
 
         //габариты предмета
-        $w = $web_items[$item_id]['KOR']['x'];
-        $h = $web_items[$item_id]['KOR']['y'];
+        $w = $item['KOR']['x'];
+        $h = $item['KOR']['y'];
         $newX = -1;
         $newY = -1;
         for ($j = 0; $j < 15; $j++) {
@@ -212,13 +209,24 @@ Class Warehouse extends CMS_System{
         }
         
         //Формируем новый HEX
-        $HEX = '';
-        foreach($items AS $key => $item){
-            if($key==$serial){
-                $HEX.='FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
+        $items_kor = Array();
+        foreach ($items AS $item) {
+            if($item['serial']==$serial){
+                continue;
             }
-            else{
-                $HEX.=$item['HEX'];
+            $x = $item['x'];
+            $y = $item['y'];
+            $items_kor[$x][$y]=$item['HEX'];
+        }
+        //Формируем новый HEX
+        $HEX = '';
+        for ($j = 0; $j < 15; $j++) {
+            for ($i = 0; $i < 8; $i++) {
+                if(!empty($items_kor[$i][$j])){
+                 $HEX.=$items_kor[$i][$j];
+                }else{
+                 $HEX.='FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
+                }
             }
         }
         
