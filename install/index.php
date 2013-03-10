@@ -8,6 +8,17 @@ define('H', str_replace($_SERVER['DOCUMENT_ROOT'], 'http://' . $_SERVER['HTTP_HO
 
 $step = isset($_GET['s']) ? (int) $_GET['s'] : 1;
 
+        //Проверяем наличие класса PDO
+        if (!class_exists('PDO')) {
+            include '_head.tpl';
+            echo 'Класс <b>PDO</b> не найден<br />
+                Установите PDO<br />
+                Раскомментируйте строку <b>extension=php_pdo_odbc.dll</b>
+';
+            include '_foot.tpl';
+            exit;
+        }
+
 if ($step == 1) {
     if (isset($_POST['DB_SERVER'])) {
 
@@ -18,6 +29,7 @@ if ($step == 1) {
             $db = new DebugPDO("odbc:Driver=" . $_POST['DB_DRIVER'] . ";Server=" . $_POST['DB_SERVER'] . ";Database=" . $_POST['DB_NAME'] . ";", $_POST['DB_USER'], $_POST['DB_PASSWORD'], $options);
             $db->setAttribute(PDO :: ATTR_DEFAULT_FETCH_MODE, PDO :: FETCH_ASSOC);
         } catch (Exception $e) {
+            include '_head.tpl';
             echo 'Ошибка соединения с базой данных: ' . $e->getMessage();
             echo '<p><a href="?s=' . $step . '">Назад</a></p>';
             include '_foot.tpl';
@@ -35,6 +47,7 @@ if ($step == 1) {
         //Определяем, используется ли MD5
         $res = $db->query("SELECT DATA_TYPE FROM information_schema.columns WHERE TABLE_NAME = 'MEMB_INFO' AND COLUMN_NAME='memb__pwd';");
         if (!$rows = $res->fetchAll()) {
+            include '_head.tpl';
             echo 'Ошибка. Не удалось получить тип столбца memb__pwd из таблицы MEMB_INFO';
             echo '<p><a href="?s=' . $step . '">Назад</a></p>';
             include '_foot.tpl';
@@ -221,6 +234,7 @@ if ($step == 1) {
         $db = new DebugPDO("odbc:Driver=" . DB_DRIVER . ";Server=" . DB_SERVER . ";Database=" . DB_NAME . ";", DB_USER, DB_PASSWORD, $options);
         $db->setAttribute(PDO :: ATTR_DEFAULT_FETCH_MODE, PDO :: FETCH_ASSOC);
     } catch (Exception $e) {
+        include '_head.tpl';
         echo 'Ошибка соединения с базой данных: ' . $e->getMessage();
         exit;
     }
@@ -229,6 +243,7 @@ if ($step == 1) {
         $res = $db->prepare("SELECT 1 FROM MEMB_INFO WHERE memb___id=?;");
         $res->execute(Array($_POST['login']));
         if (!$row = $res->fetch()) {
+            include '_head.tpl';
             echo 'Пользователь с таким логином не найден';
             echo '<p><a href="?s=' . $step . '">Назад</a></p>';
             include '_foot.tpl';
@@ -238,6 +253,7 @@ if ($step == 1) {
         //Устанавливаем права супер админа
         $res = $db->prepare("UPDATE MEMB_INFO SET mm_group='root' WHERE memb___id=?;");
         $res->execute(Array($_POST['login']));
+        include '_head.tpl';
         echo 'Установка завершена. Проверьте работоспособность сайта, и обязательно удалите папку <b>install</b>!!!';
         echo '<p><a href="/">На главную</a></p>';
         include '_foot.tpl';
