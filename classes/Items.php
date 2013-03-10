@@ -148,7 +148,7 @@ Class Items extends CMS_System {
         //Кэширование
         $files_data = Array();
         if (!$files_data = $this->cache->get('files_data')) {
-            $cache_file = D . '/sys/server/cache.dat';
+            $cache_file = D . '/sys/server/cache'.SEASON.'.dat';
             if (is_file($cache_file)) {
                 $files_data = unserialize(file_get_contents($cache_file));
                 $files_change_time = Array();
