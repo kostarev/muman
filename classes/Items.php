@@ -148,38 +148,41 @@ Class Items extends CMS_System {
         $arr['h_val'] = hexdec(substr($str, 21, 1));
 
         //Кэширование
-        $files_data = Array();
-        if (!$files_data = $this->cache->get('files_data')) {
-            $cache_file = D . '/sys/server/cache' . SEASON . '.dat';
-            if (is_file($cache_file)) {
-                $files_data = unserialize(file_get_contents($cache_file));
-                $files_change_time = Array();
-                $files_change_time[] = filectime(D . '/sys/server/Item(Kor).txt');
-                $files_change_time[] = filectime(D . '/sys/server/ItemAddOption.txt');
-                $files_change_time[] = filectime(D . '/sys/server/JewelOfHarmonyOption.txt');
-                $files_change_time[] = filectime(D . '/sys/server/Skill(Kor).txt');
-                $max_time = max($files_change_time);
-                if ($files_data['cache_time'] < $max_time) {
-                    $files_data = Array();
+        static $files_data;
+        if (!isset($files_data)) {
+            $files_data = Array();
+            if (!$files_data = $this->cache->get('files_data')) {
+                $cache_file = D . '/sys/server/cache' . SEASON . '.dat';
+                if (is_file($cache_file)) {
+                    $files_data = unserialize(file_get_contents($cache_file));
+                    $files_change_time = Array();
+                    $files_change_time[] = filectime(D . '/sys/server/Item(Kor).txt');
+                    $files_change_time[] = filectime(D . '/sys/server/ItemAddOption.txt');
+                    $files_change_time[] = filectime(D . '/sys/server/JewelOfHarmonyOption.txt');
+                    $files_change_time[] = filectime(D . '/sys/server/Skill(Kor).txt');
+                    $max_time = max($files_change_time);
+                    if ($files_data['cache_time'] < $max_time) {
+                        $files_data = Array();
+                    }
                 }
-            }
 
-            if (!$files_data) {
-                $files_data['cache_time'] = TIME;
-                $files_data['harmonys'] = $this->harmonys();
-                $files_data['itemKor'] = $this->itemKor();
-                $files_data['itemAddOption'] = $this->itemAddOption();
-                $files_data['skillKor'] = $this->skillKor();
-                $this->cache->set('files_data', $files_data, 600);
-                $cache_str = serialize($files_data);
-                file_put_contents($cache_file, $cache_str);
+                if (!$files_data) {
+                    $files_data['cache_time'] = TIME;
+                    $files_data['harmonys'] = $this->harmonys();
+                    $files_data['itemKor'] = $this->itemKor();
+                    $files_data['itemAddOption'] = $this->itemAddOption();
+                    $files_data['skillKor'] = $this->skillKor();
+                    $this->cache->set('files_data', $files_data, 600);
+                    $cache_str = serialize($files_data);
+                    file_put_contents($cache_file, $cache_str);
+                }
             }
         }
         //---------------
 
         $harmonys = $files_data['harmonys'];
         if ($arr['h_type'] AND $this->itemType2HarmonyType($arr['type'])) {
-            $arr['harmonys'] = isset($harmonys[$this->itemType2HarmonyType($arr['type'])][$arr['h_type']])?$harmonys[$this->itemType2HarmonyType($arr['type'])][$arr['h_type']]:Array();
+            $arr['harmonys'] = isset($harmonys[$this->itemType2HarmonyType($arr['type'])][$arr['h_type']]) ? $harmonys[$this->itemType2HarmonyType($arr['type'])][$arr['h_type']] : Array();
         }
 
         $sockets_str = substr($str, 22, 10);
