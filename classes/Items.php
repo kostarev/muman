@@ -101,8 +101,8 @@ Class Items extends CMS_System {
                 . dechex($arr['opt108'])                 //19,1
                 . dechex($arr['h_type'])                 //20,1
                 . dechex($arr['h_val'])                  //21,1
-                . $arr['sockets_str'];                    //22,10
-        //  . substr($arr['HEX'], 32);                //Остальной кусок HEX не трогаем
+                . $arr['sockets_str']                    //22,10
+                . substr($arr['HEX'], 32);                //Остальной кусок HEX не трогаем
         return $str;
     }
 
@@ -126,8 +126,10 @@ Class Items extends CMS_System {
         $arr['is_skill'] = substr($option_bin, 1, 1);
         $arr['level'] = bindec(substr($option_bin, 2, 4));
         //Ограничеваем level
-        if ($arr['level'] > 13) {
-            $arr['level'] = 13;
+        if (SEASON < 5) {
+            if ($arr['level'] > 13) {
+                $arr['level'] = 13;
+            }
         }
         $arr['luck'] = substr($option_bin, 6, 1);
         $arr['option'] = bindec(substr($option_bin, 7, 2)) * 4;
@@ -148,7 +150,7 @@ Class Items extends CMS_System {
         //Кэширование
         $files_data = Array();
         if (!$files_data = $this->cache->get('files_data')) {
-            $cache_file = D . '/sys/server/cache'.SEASON.'.dat';
+            $cache_file = D . '/sys/server/cache' . SEASON . '.dat';
             if (is_file($cache_file)) {
                 $files_data = unserialize(file_get_contents($cache_file));
                 $files_change_time = Array();
@@ -177,7 +179,7 @@ Class Items extends CMS_System {
 
         $harmonys = $files_data['harmonys'];
         if ($arr['h_type'] AND $this->itemType2HarmonyType($arr['type'])) {
-            $arr['harmonys'] = $harmonys[$this->itemType2HarmonyType($arr['type'])][$arr['h_type']];
+            $arr['harmonys'] = isset($harmonys[$this->itemType2HarmonyType($arr['type'])][$arr['h_type']])?$harmonys[$this->itemType2HarmonyType($arr['type'])][$arr['h_type']]:Array();
         }
 
         $sockets_str = substr($str, 22, 10);
@@ -197,17 +199,20 @@ Class Items extends CMS_System {
         }
 
         $itemKor = $files_data['itemKor'];
-        if (!isset($itemKor[$arr['type']][$arr['id']])) {
-            throw new Exception('Ошибка получения предмета Type: ' . $arr['type'] . ' ID: ' . $arr['id']);
-        }
-        $arr['KOR'] = $itemKor[$arr['type']][$arr['id']];
+        /*
+          if (!isset($itemKor[$arr['type']][$arr['id']])) {
+          throw new Exception('Ошибка получения предмета Type: ' . $arr['type'] . ' ID: ' . $arr['id']);
+          }
+         */
+        $arr['KOR'] = isset($itemKor[$arr['type']][$arr['id']]) ? $itemKor[$arr['type']][$arr['id']] : Array();
+
         $itemAddOption = $files_data['itemAddOption'];
         $arr['addoption'] = isset($itemAddOption[$arr['type']][$arr['id']]) ? $itemAddOption[$arr['type']][$arr['id']] : Array();
         $skillKor = $files_data['skillKor'];
-        $arr['skill'] = isset($skillKor[$arr['KOR']['skill']]) ? $skillKor[$arr['KOR']['skill']] : Array();
+        $arr['skill'] = (isset($arr['KOR']['skill']) AND isset($skillKor[$arr['KOR']['skill']])) ? $skillKor[$arr['KOR']['skill']] : Array();
         $arr['type_name'] = $this->itemtype($arr['type']);
         $arr['HEX'] = $str;
-        $arr['img'] = $arr['type'].'-'.$arr['id'].'.gif';
+        $arr['img'] = $arr['type'] . '-' . $arr['id'] . '.gif';
         return $arr;
     }
 
@@ -526,14 +531,19 @@ Class Items extends CMS_System {
     }
 
     //Skill(Kor).txt парсер
-    function skillKor() {
+    function skillKor($fname = '') {
         static $skills;
         if (isset($skills)) {
             return $skills;
         }
-        $file = D . '/sys/server/Skill(Kor).txt';
+
+        if (!$fname) {
+            $fname = 'Skill(Kor).txt';
+        }
+
+        $file = D . '/sys/server/' . $fname;
         if (!is_file($file)) {
-            throw new Exception('Поместите файл Skill(Kor).txt в папку sys/server');
+            throw new Exception('Поместите файл ' . $fname . ' в папку sys/server');
         }
 
         $skills = Array();

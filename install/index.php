@@ -6,6 +6,19 @@ session_start();
 define('D', $_SERVER['DOCUMENT_ROOT']);
 define('H', str_replace($_SERVER['DOCUMENT_ROOT'], 'http://' . $_SERVER['HTTP_HOST'], D));
 
+if (!defined('PHP_VERSION_ID')) {
+    $version = explode('.', PHP_VERSION);
+    define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
+}
+
+if (PHP_VERSION_ID < 50300) {
+    include '_head.tpl';
+    echo 'Ваша версия php: <b>'.PHP_VERSION.'</b><br />
+          Для работы Mu Manager необходима php версии не ниже <b>5.3</b><br />';
+    include '_foot.tpl';
+    exit;
+}
+
 $step = isset($_GET['s']) ? (int) $_GET['s'] : 1;
 
 //Проверяем наличие класса PDO
@@ -13,8 +26,7 @@ if (!class_exists('PDO')) {
     include '_head.tpl';
     echo 'Класс <b>PDO</b> не найден<br />
                 Установите PDO<br />
-                Раскомментируйте строку <b>extension=php_pdo_odbc.dll</b>
-';
+                Раскомментируйте строку <b>extension=php_pdo_odbc.dll</b>';
     include '_foot.tpl';
     exit;
 }

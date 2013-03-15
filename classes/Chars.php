@@ -66,13 +66,13 @@ Class Chars extends CMS_System {
     //Получение класса персонажа из цифры
     function get_class($value) {
         $class[0]['name'] = 'Dark Wizard';
-        $class[0]['img'] = 'sm';
+        $class[0]['img'] = 'dw';
         $class[1]['name'] = 'Soul Master';
-        $class[1]['img'] = 'sm';
+        $class[1]['img'] = 'dw';
         $class[2]['name'] = 'Grand Master';
-        $class[2]['img'] = 'sm';
+        $class[2]['img'] = 'dw';
         $class[3]['name'] = 'Grand Master';
-        $class[3]['img'] = 'sm';
+        $class[3]['img'] = 'dw';
         $class[16]['name'] = 'Dark Knight';
         $class[16]['img'] = 'dk';
         $class[17]['name'] = 'Blade Knight';

@@ -1,22 +1,32 @@
 <?php
 
-Class Warehouse extends CMS_System{
+Class Warehouse extends CMS_System {
 
-    
+    private $empty_item_hex, $item_hex_len;
     //Одиночка паттерн------
     static protected $instance = null;
+
     //Метод предоставляет доступ к объекту
-    static public function me(){
+    static public function me() {
         if (is_null(self::$instance))
             self::$instance = new Warehouse();
         return self::$instance;
     }
-    
+
     protected function __construct() {
         parent::__construct();
+
+        //Определяем длину HEX предмета
+        if (SEASON > 5) {
+            $this->item_hex_len = 64;
+            $this->empty_item_hex = 'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
+        } else {
+            $this->item_hex_len = 32;
+            $this->empty_item_hex = 'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
+        }
     }
+
     //------------------------
-    
     //Получение сундука
     function get($id) {
         $arr = Array();
@@ -58,14 +68,6 @@ Class Warehouse extends CMS_System{
 
         $str = $row['Items'];
 
-        //Обрезаем 0x
-        if (substr($str, 0, 2) == '0x') {
-            $str = substr($str, 2);
-        }
-        
-        //Определяем длину HEX предмета
-        $item_hex_len = 32 * ceil(floor(strlen($str) / 120) / 32);
-        
         $items = Array();
         $pos = 0;
         $i = 0;
@@ -73,50 +75,50 @@ Class Warehouse extends CMS_System{
         $x = 0;
         $y = 0;
 
-        while ($i < 120 AND $item_str = substr($str, $pos, $item_hex_len)) {
+        while ($i < 120 AND $item_str = substr($str, $pos, $this->item_hex_len)) {
             $i++;
-            $pos += $item_hex_len;
+            $pos += $this->item_hex_len;
             if (substr_count($item_str, "\0")) {
-                $item_str = str_replace("\0", '', $item_str) . '0';
+                $item_str = str_replace("\0", '', $item_str) . 'F';
             }
-            
-            //Обрезаем лишнее в HEX
-            $item_str = substr($item_str, 0, 32);
 
-            try{
+            
+            try {
                 $item = Items::me()->hex2item($item_str);
                 $item['x'] = $x;
                 $item['y'] = $y;
                 $items[$item['serial']] = $item;
-            }catch(Exception $e){
+            } catch (Exception $e) {
                 
             }
             
-            
+            //echo $i . ' - ' . $item_str . '-'.$item_str[18]. '<br />';
             $x++;
             if ($x >= 8) {
                 $x = 0;
                 $y++;
                 $pos++;
+            }elseif ($x == 4 AND SEASON > 4) {
+                 $pos++;
             }
         }
         $items_arr[$id] = $items;
         return $items;
     }
-    
+
     //Добавление предмета в сундук
-    function add_item($id, $HEX){
+    function add_item($id, $HEX) {
         //Проверяем нет ли в сундуке предмета с тем же serial
         $items = $this->get_items($id);
         $item = Items::me()->hex2item($HEX);
 
-            //Меняем serial перемещаемого предмета, если такой уже есть
-            while (isset($items[$item['serial']])) {
-                $item['serial'] = Func::rand_string(8, '0123456789ABCDEF');
-                 //Формируем новый HEX предмета с учётом нового serial
-                $item['HEX'] = Items::me()->item2hex($item);   
-            }
-        
+        //Меняем serial перемещаемого предмета, если такой уже есть
+        while (isset($items[$item['serial']])) {
+            $item['serial'] = Func::rand_string(8, '0123456789ABCDEF');
+            //Формируем новый HEX предмета с учётом нового serial
+            $item['HEX'] = Items::me()->item2hex($item);
+        }
+
 
 
         //Ищем свободное место для предмета
@@ -128,12 +130,12 @@ Class Warehouse extends CMS_System{
         }
 
         $items_kor = Array();
-        foreach ($items AS $item) {
-            $x = $item['x'];
-            $y = $item['y'];
-            $w = $item['KOR']['x'];
-            $h = $item['KOR']['y'];
-            $items_kor[$x][$y]=$item['HEX'];
+        foreach ($items AS $it) {
+            $x = $it['x'];
+            $y = $it['y'];
+            $w = $it['KOR']['x'];
+            $h = $it['KOR']['y'];
+            $items_kor[$x][$y] = $it['HEX'];
             for ($j = $y; $j < $y + $h; $j++) {
                 for ($i = $x; $i < $x + $w; $i++) {
                     $pole[$i][$j] = 1;
@@ -157,7 +159,7 @@ Class Warehouse extends CMS_System{
                     $ok = true;
                     for ($y = $j; $y < $j + $h; $y++) {
                         for ($x = $i; $x < $i + $w; $x++) {
-                            if ($x>7 OR $y>14 OR $pole[$x][$y]) {
+                            if ($x > 7 OR $y > 14 OR $pole[$x][$y]) {
                                 $ok = false;
                             }
                         }
@@ -179,81 +181,81 @@ Class Warehouse extends CMS_System{
         if ($newX == -1 OR $newY == -1) {
             throw new Exception('В сундуке нет места для этого предмета');
         }
-        
+
         //Формируем новый HEX
         $newHEX = '';
         for ($j = 0; $j < 15; $j++) {
             for ($i = 0; $i < 8; $i++) {
-                if(!empty($items_kor[$i][$j])){
-                 $newHEX.=$items_kor[$i][$j];
-                }elseif($i==$newX AND $j==$newY){
+                if (!empty($items_kor[$i][$j])) {
+                    $newHEX.=$items_kor[$i][$j];
+                } elseif ($i == $newX AND $j == $newY) {
                     $newHEX.=$HEX;
-                }else{
-                    $newHEX.='FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
+                } else {
+                    $newHEX.= $this->empty_item_hex;
                 }
             }
         }
-         
+
         //Сохраняем новый HEX
         $bin = Items::me()->hextobin($newHEX);
         $res = $this->db->prepare("UPDATE warehouse SET [Items]=? WHERE [AccountID]=?;");
         $res->execute(Array($bin, $id));
     }
-    
+
     //Удаление предмета из сундука
-    function del_item($user_id,$serial){
+    function del_item($user_id, $serial) {
         //Получаем предметы юзера
         $items = $this->get_items($user_id);
-        if(!isset($items[$serial])){
+        if (!isset($items[$serial])) {
             throw new Exception('Нет предмета в сундуке');
         }
-        
+
         //Формируем новый HEX
         $items_kor = Array();
         foreach ($items AS $item) {
-            if($item['serial']==$serial){
+            if ($item['serial'] == $serial) {
                 continue;
             }
             $x = $item['x'];
             $y = $item['y'];
-            $items_kor[$x][$y]=$item['HEX'];
+            $items_kor[$x][$y] = $item['HEX'];
         }
         //Формируем новый HEX
         $HEX = '';
         for ($j = 0; $j < 15; $j++) {
             for ($i = 0; $i < 8; $i++) {
-                if(!empty($items_kor[$i][$j])){
-                 $HEX.=$items_kor[$i][$j];
-                }else{
-                 $HEX.='FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
+                if (!empty($items_kor[$i][$j])) {
+                    $HEX.=$items_kor[$i][$j];
+                } else {
+                    $HEX.=$this->empty_item_hex;
                 }
             }
         }
-        
+
         //Сохраняем новый HEX
         $bin = Items::me()->hextobin($HEX);
         $res = $this->db->prepare("UPDATE warehouse SET [Items]=? WHERE [AccountID]=?;");
         $res->execute(Array($bin, $user_id));
     }
-    
+
     //Перемещение предметов в сундуке по карте
-    function replace_items($id, $item_id,$newX,$newY) {
+    function replace_items($id, $item_id, $newX, $newY) {
         $items_pos = Array();
-        $newX = (int)$newX;
-        $newY=(int)$newY;
+        $newX = (int) $newX;
+        $newY = (int) $newY;
 
         $items = $this->get_items($id);
-        if(!isset($items[$item_id])){
+        if (!isset($items[$item_id])) {
             throw new Exception('Такого предмета нет в сундуке');
         }
-        
-        $width =  $items[$item_id]['KOR']['x'];
+
+        $width = $items[$item_id]['KOR']['x'];
         $height = $items[$item_id]['KOR']['y'];
-        
-        if($newX<0 OR $newX+$width>8 OR $newY<0 OR $newY+$height>15){
+
+        if ($newX < 0 OR $newX + $width > 8 OR $newY < 0 OR $newY + $height > 15) {
             throw new Exception('Заданы не верные координаты');
         }
-       
+
         //Ищем свободное место для предмета
         $pole = Array();
         for ($j = 0; $j < 15; $j++) {
@@ -263,33 +265,33 @@ Class Warehouse extends CMS_System{
         }
 
         $items_kor = Array();
-        foreach ($items AS $key=>$item) {
-            if($key == $item_id){
+        foreach ($items AS $key => $item) {
+            if ($key == $item_id) {
                 continue;
             }
             $x = $item['x'];
             $y = $item['y'];
             $w = $item['KOR']['x'];
             $h = $item['KOR']['y'];
-            $items_kor[$x][$y]=$item['HEX'];
+            $items_kor[$x][$y] = $item['HEX'];
             for ($j = $y; $j < $y + $h; $j++) {
                 for ($i = $x; $i < $x + $w; $i++) {
                     $pole[$i][$j] = $key;
                 }
             }
         }
-        
+
         //Проверяем возможность перемещения
         $accessible = true;
-        for ($j = $newY; $j < $newY+$height; $j++) {
-            for ($i = $newX; $i < $newX+$width; $i++) {
-                if($pole[$i][$j]){
+        for ($j = $newY; $j < $newY + $height; $j++) {
+            for ($i = $newX; $i < $newX + $width; $i++) {
+                if ($pole[$i][$j]) {
                     $accessible = false;
                     $error_item = $items[$pole[$i][$j]]['KOR']['name'];
                 }
             }
         }
-        
+
         if (!$accessible) {
             throw new Exception('Ячейка занята другим предметом (' . $error_item . ')');
         }
@@ -300,12 +302,12 @@ Class Warehouse extends CMS_System{
         $HEX = '';
         for ($j = 0; $j < 15; $j++) {
             for ($i = 0; $i < 8; $i++) {
-                if(!empty($items_kor[$i][$j])){
-                 $HEX.=$items_kor[$i][$j];
-                }elseif($i==$newX AND $j==$newY){
+                if (!empty($items_kor[$i][$j])) {
+                    $HEX.=$items_kor[$i][$j];
+                } elseif ($i == $newX AND $j == $newY) {
                     $HEX.=$items[$item_id]['HEX'];
-                }else{
-                    $HEX.='FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
+                } else {
+                    $HEX.=$this->empty_item_hex;
                 }
             }
         }
@@ -316,27 +318,26 @@ Class Warehouse extends CMS_System{
         $res->execute(Array($bin, $id));
     }
 
-    
     //Изменение денег в сундуке
     function money($user_id, $money) {
         $money = (int) $money;
         $this->make($user_id);
         $money_was = $this->get_money($user_id);
-        if($money_was+$money >2000000000){
+        if ($money_was + $money > 2000000000) {
             throw new Exception('В сундук нельзя поместить больше 2 000 000 000 Zen');
         }
         $res = $this->db->prepare("UPDATE warehouse SET Money=Money+? WHERE AccountID=?;");
         $res->execute(Array($money, $user_id));
     }
-    
+
     //Создание сундука
-    function make($id){
+    function make($id) {
         $res = $this->db->prepare("SELECT AccountID FROM warehouse WHERE AccountID=?;");
         $res->execute(Array($id));
-        if(!$res->fetch()){
-        $res = $this->db->prepare("INSERT INTO warehouse (AccountID) VALUES (?);");
-        $res->execute(Array($id));
-        return true;
+        if (!$res->fetch()) {
+            $res = $this->db->prepare("INSERT INTO warehouse (AccountID) VALUES (?);");
+            $res->execute(Array($id));
+            return true;
         }
         return false;
     }

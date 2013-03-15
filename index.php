@@ -40,6 +40,7 @@ $registry['lang'] = new Lang(LANGUAGE);
 
 try {
     $options = Array("CharacterSet" => "UTF-8");
+    //$db = new DebugPDO("sqlsrv:Server=" . DB_SERVER . ";Database=" . DB_NAME . ";", DB_USER, DB_PASSWORD, $options);
     $db = new DebugPDO("odbc:Driver=".DB_DRIVER.";Server=" . DB_SERVER . ";Database=" . DB_NAME . ";", DB_USER, DB_PASSWORD, $options);
     $db->setAttribute(PDO :: ATTR_DEFAULT_FETCH_MODE, PDO :: FETCH_ASSOC);
     $db->log_on();

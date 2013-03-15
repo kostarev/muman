@@ -20,7 +20,9 @@ Class Guilds extends CMS_System{
      //Топ гильдий
     function get_guilds_top($order) {
         $chars = $this->db->get("SELECT TOP 100 [Guild].*, 
-            (SELECT COUNT([GuildMember].[Name]) FROM [GuildMember] WHERE [GuildMember].[G_Name] = [Guild].[G_Name]) AS cnt
+            (SELECT COUNT([GuildMember].[Name]) 
+            FROM [GuildMember] 
+            WHERE [GuildMember].[G_Name] = [Guild].[G_Name]) AS cnt
       FROM [Guild] 
       ORDER BY $order;", 30);
         return $chars;
